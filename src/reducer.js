@@ -25,6 +25,15 @@ function reducer(
     fetchedHealthFacility: false,
     healthFacility: null,
     errorHealthFacility: null,
+    fetchingHotspots: false,
+    fetchedHotspots: false,
+    hotspots: null,
+    hotspotsPageInfo: {},
+    errorHotspots: null,
+    fetchingHotspot: false,
+    fetchedHotspot: false,
+    hotspot: null,
+    errorHotspot: null,
     fetchingL0s: false,
     fetchedL0s: false,
     l0s: [],
@@ -195,6 +204,61 @@ function reducer(
         fetchedHealthFacility: false,
         healthFacility: null,
         errorHealthFacility: null,
+      };
+    case "LOCATION_HOTSPOT_SEARCHER_REQ":
+      return {
+        ...state,
+        fetchingHotspots: true,
+        fetchedHotspots: false,
+        hotspots: null,
+        hotspotsPageInfo: { totalCount: 0 },
+        errorHotspots: null,
+      };
+    case "LOCATION_HOTSPOT_SEARCHER_RESP":
+      return {
+        ...state,
+        fetchingHotspots: false,
+        fetchedHotspots: true,
+        hotspots: parseData(action.payload.data.hotspots),
+        hotspotsPageInfo: pageInfo(action.payload.data.hotspots),
+        errorHotspots: formatGraphQLError(action.payload),
+      };
+    case "LOCATION_HOTSPOT_SEARCHER_ERR":
+      return {
+        ...state,
+        fetchingHotspots: false,
+        errorHotspots: formatServerError(action.payload),
+      };
+    case "LOCATION_HOTSPOT_REQ":
+      return {
+        ...state,
+        fetchingHotspot: true,
+        fetchedHotspot: false,
+        hotspot: null,
+        errorHotspot: null,
+      };
+    case "LOCATION_HOTSPOT_RESP":
+      const hotspots = parseData(action.payload.data.hotspots);
+      return {
+        ...state,
+        fetchingHotspot: false,
+        fetchedHotspot: true,
+        hotspot: !!hotspots && hotspots.length > 0 ? hotspots[0] : null,
+        errorHotspot: formatGraphQLError(action.payload),
+      };
+    case "LOCATION_HOTSPOT_ERR":
+      return {
+        ...state,
+        fetchingHotspot: false,
+        errorHotspot: formatServerError(action.payload),
+      };
+    case "LOCATION_HOTSPOT_CLEAR":
+      return {
+        ...state,
+        fetchingHotspot: false,
+        fetchedHotspot: false,
+        hotspot: null,
+        errorHotspot: null,
       };
     case "LOCATION_LOCATIONS_0_REQ":
       return {
@@ -528,6 +592,12 @@ function reducer(
       return dispatchMutationResp(state, "updateHealthFacility", action);
     case "LOCATION_DELETE_HEALTH_FACILITY_RESP":
       return dispatchMutationResp(state, "deleteHealthFacility", action);
+    case "LOCATION_CREATE_HOTSPOT_RESP":
+      return dispatchMutationResp(state, "createHotspot", action);
+    case "LOCATION_UPDATE_HOTSPOT_RESP":
+      return dispatchMutationResp(state, "createHotspot", action);
+    case "LOCATION_DELETE_HOTSPOT_RESP":
+      return dispatchMutationResp(state, "deleteHotspot", action);
     case "LOCATION_LOCATIONS_BY_UUIDS_REQ":
       return {
         ...state,
@@ -638,6 +708,15 @@ function reducer(
         fetchedHealthFacility: false,
         healthFacility: null,
         errorHealthFacility: null,
+        fetchingHotspots: false,
+        fetchedHotspots: false,
+        hotspots: null,
+        hotspotsPageInfo: {},
+        errorHotspots: null,
+        fetchingHotspot: false,
+        fetchedHotspot: false,
+        hotspot: null,
+        errorHotspot: null,
         fetchingL0s: false,
         fetchedL0s: false,
         l0s: [],

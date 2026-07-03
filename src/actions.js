@@ -150,6 +150,47 @@ export function fetchHealthFacilitySummaries(filters) {
   return graphql(payload, "LOCATION_HEALTH_FACILITY_SEARCHER");
 }
 
+export function fetchHotspotSummaries(filters) {
+  const projections = [
+    "id",
+    "uuid",
+    "code",
+    "name",
+    "description",
+    "microCatchment{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name}}}",
+    "villages{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name}}}}",
+    "village{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name}}}}",
+    "validityFrom",
+    "validityTo",
+  ];
+  const payload = formatPageQueryWithCount("hotspots", filters, projections);
+  return graphql(payload, "LOCATION_HOTSPOT_SEARCHER");
+}
+
+export function fetchHotspot(hotspotUuid, hotspotCode) {
+  const filters = [hotspotUuid ? `uuid: "${hotspotUuid}"` : `code: "${hotspotCode}"`];
+  const projections = [
+    "id",
+    "uuid",
+    "code",
+    "name",
+    "description",
+    "microCatchment{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name}}}",
+    "villages{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name}}}}",
+    "village{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name}}}}",
+    "validityFrom",
+    "validityTo",
+  ];
+  const payload = formatPageQuery("hotspots", filters, projections);
+  return graphql(payload, "LOCATION_HOTSPOT");
+}
+
+export function clearHotspot() {
+  return (dispatch) => {
+    dispatch({ type: "LOCATION_HOTSPOT_CLEAR" });
+  };
+}
+
 export function fetchLocations(levels, type, parent) {
   let filters = [
     `
@@ -380,6 +421,43 @@ export function deleteHealthFacility(hf, clientMutationLabel) {
       requestedDateTime,
     },
   );
+}
+
+function formatHotspotGQL(hotspot) {
+  return `
+    ${hotspot.uuid !== undefined && hotspot.uuid !== null ? `uuid: "${hotspot.uuid}"` : ""}
+    code: "${formatGQLString(hotspot.code)}"
+    name: "${formatGQLString(hotspot.name)}"
+    ${!!hotspot.description ? `description: "${formatGQLString(hotspot.description)}"` : ""}
+    microCatchmentUuid: "${hotspot.microCatchment.uuid}"
+    villageUuids: [${hotspot.villages.map((village) => `"${village.uuid}"`).join(", ")}]
+  `;
+}
+
+export function createOrUpdateHotspot(hotspot, clientMutationLabel) {
+  const action = hotspot.uuid !== undefined && hotspot.uuid !== null ? "update" : "create";
+  const mutation = formatMutation("createHotspot", formatHotspotGQL(hotspot), clientMutationLabel);
+  const requestedDateTime = new Date();
+  return graphql(
+    mutation.payload,
+    ["LOCATION_MUTATION_REQ", `LOCATION_${action.toUpperCase()}_HOTSPOT_RESP`, "LOCATION_MUTATION_ERR"],
+    {
+      clientMutationId: mutation.clientMutationId,
+      clientMutationLabel,
+      requestedDateTime,
+    },
+  );
+}
+
+export function deleteHotspot(hotspot, clientMutationLabel) {
+  const mutation = formatMutation("deleteHotspot", `uuid: "${hotspot.uuid}"`, clientMutationLabel);
+  const requestedDateTime = new Date();
+  hotspot.clientMutationId = mutation.clientMutationId;
+  return graphql(mutation.payload, ["LOCATION_MUTATION_REQ", "LOCATION_DELETE_HOTSPOT_RESP", "LOCATION_MUTATION_ERR"], {
+    clientMutationId: mutation.clientMutationId,
+    clientMutationLabel,
+    requestedDateTime,
+  });
 }
 
 export function selectLocation(location, level, maxLevels) {
