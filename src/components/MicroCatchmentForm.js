@@ -196,7 +196,7 @@ class MicroCatchmentForm extends Component {
             {/* District (top level of the Malawi hierarchy = Location type R) */}
             <Grid item xs={4} className={classes.item}>
               <PublishedComponent
-                pubRef="location.RegionPicker"
+                pubRef="location.DistrictPicker"
                 value={district}
                 readOnly={readOnly}
                 required

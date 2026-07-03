@@ -1,3 +1,4 @@
+import React from "react";
 import LocationsPage from "./pages/LocationsPage";
 import HealthFacilitiesPage from "./pages/HealthFacilitiesPage";
 import HealthFacilityEditPage from "./pages/HealthFacilityEditPage";
@@ -32,11 +33,6 @@ import LocationTypePicker from "./pickers/LocationTypePicker";
 import messages_en from "./translations/en.json";
 import reducer from "./reducer";
 import {
-  RIGHT_MICRO_CATCHMENT_ADD,
-  RIGHT_MICRO_CATCHMENT_EDIT,
-  RIGHT_MICRO_CATCHMENT_DELETE,
-} from "./constants";
-import {
   RIGHT_LOCATIONS,
   RIGHT_LOCATION_ADD,
   RIGHT_LOCATION_EDIT,
@@ -63,8 +59,6 @@ const hasMicroCatchmentAccess = (rights = []) =>
   [RIGHT_MICRO_CATCHMENT_ADD, RIGHT_MICRO_CATCHMENT_EDIT, RIGHT_MICRO_CATCHMENT_DELETE].some((right) =>
     hasRight(rights, right)
   );
-const ROUTE_HOTSPOTS = "location/hotspots";
-const ROUTE_HOTSPOT_EDIT = "location/hotspot";
 
 const DEFAULT_CONFIG = {
   "translations": [{ key: "en", messages: messages_en }],
@@ -108,11 +102,6 @@ const DEFAULT_CONFIG = {
     { key: "location.FSPCoarseLocation", ref: FSPCoarseLocation },
     { key: "location.DetailedLocation", ref: DetailedLocation },
     { key: "location.DetailedHealthFacility", ref: DetailedHealthFacility },
-    
-    { key: "location.route.healthFacility", ref: ROUTE_HEALTH_FACILITY_EDIT },
-    { key: "location.route.hotspot", ref: ROUTE_HOTSPOT_EDIT },
-    { key: "location.route.microCatchments", ref: ROUTE_MICRO_CATCHMENTS },
-    { key: "location.route.microCatchment", ref: ROUTE_MICRO_CATCHMENT_EDIT },
   ],
   "core.Router": [
     {
@@ -160,9 +149,6 @@ const DEFAULT_CONFIG = {
       rights: [RIGHT_LOCATIONS],
       icon: "LocalHospital",
     },
-    { path: ROUTE_MICRO_CATCHMENTS, component: MicroCatchmentsPage },
-    { path: ROUTE_MICRO_CATCHMENT_EDIT, component: MicroCatchmentEditPage },
-    { path: ROUTE_MICRO_CATCHMENT_EDIT + "/:microCatchment_uuid?", component: MicroCatchmentEditPage },
     {
       path: ROUTE_MICRO_CATCHMENTS,
       component: MicroCatchmentsPage,
@@ -211,17 +197,9 @@ const DEFAULT_CONFIG = {
       text: <FormattedMessage module="admin" id="menu.healthFacilities" />,
       icon: <LocalHospital />,
       route: `/${ROUTE_HEALTH_FACILITIES}`,
-      route: `/${ROUTE_HEALTH_FACILITIES}`,
       id: "admin.healthFacilities",
       filter: (rights) => rights.includes(RIGHT_HEALTH_FACILITIES),
       withDivider: true,
-    },
-    {
-      text: <FormattedMessage module="location" id="menu.microCatchments" />,
-      icon: <LocationOnIcon />,
-      route: `/${ROUTE_MICRO_CATCHMENTS}`,
-      id: "location.microCatchments",
-      filter: (rights) => hasMicroCatchmentAccess(rights),
     },
   ],
   "core.Boot": [UserHealthFacilityLoader, UserDistrictsLoader],
