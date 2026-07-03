@@ -64,8 +64,8 @@ class HotspotsSearcher extends Component {
   sorts = () => [
     ["code", true],
     ["name", true],
-    ["micro_catchment__parent__parent__code", true],
-    ["micro_catchment__parent__code", true],
+    null,
+    ["micro_catchment__district__code", true],
     ["micro_catchment__code", true],
     null,
     null,
@@ -77,8 +77,12 @@ class HotspotsSearcher extends Component {
     const formatters = [
       (hotspot) => hotspot.code,
       (hotspot) => hotspot.name,
-      (hotspot) => (hotspot.microCatchment?.parent?.parent ? locationLabel(hotspot.microCatchment.parent.parent) : null),
-      (hotspot) => (hotspot.microCatchment?.parent ? locationLabel(hotspot.microCatchment.parent) : null),
+      (hotspot) =>
+        (hotspot.microCatchment?.traditionalAuthorities || [])
+          .map((ta) => ta?.location?.name)
+          .filter(Boolean)
+          .join(", ") || null,
+      (hotspot) => (hotspot.microCatchment?.district ? locationLabel(hotspot.microCatchment.district) : null),
       (hotspot) => (hotspot.microCatchment ? locationLabel(hotspot.microCatchment) : null),
       (hotspot) => (hotspot.villages?.length ? hotspot.villages.map(locationLabel).join(", ") : null),
       (hotspot) => hotspot.description,

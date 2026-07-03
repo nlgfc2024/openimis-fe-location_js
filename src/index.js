@@ -1,12 +1,10 @@
-import React from "react";
-import LocationOnIcon from "@material-ui/icons/LocationOn";
 import LocationsPage from "./pages/LocationsPage";
 import HealthFacilitiesPage from "./pages/HealthFacilitiesPage";
 import HealthFacilityEditPage from "./pages/HealthFacilityEditPage";
-import MicroCatchmentsPage from "./pages/MicroCatchmentsPage";
-import MicroCatchmentEditPage from "./pages/MicroCatchmentEditPage";
 import HotspotsPage from "./pages/HotspotsPage";
 import HotspotEditPage from "./pages/HotspotEditPage";
+import MicroCatchmentsPage from "./pages/MicroCatchmentsPage";
+import MicroCatchmentEditPage from "./pages/MicroCatchmentEditPage";
 import { FormattedMessage } from "@openimis/fe-core";
 import { LocalHospital, LocationOn, PinDrop } from "@material-ui/icons";
 import UserHealthFacilityLoader from "./components/UserHealthFacilityLoader";
@@ -44,6 +42,9 @@ import {
   RIGHT_LOCATION_EDIT,
   RIGHT_HEALTH_FACILITY_ADD,
   RIGHT_HEALTH_FACILITIES,
+  RIGHT_MICRO_CATCHMENT_ADD,
+  RIGHT_MICRO_CATCHMENT_EDIT,
+  RIGHT_MICRO_CATCHMENT_DELETE,
 } from "./constants";
 
 import { LOCATION_SUMMARY_PROJECTION, nestParentsProjections } from "./utils";
@@ -52,6 +53,8 @@ import { HEALTH_FACILITY_PICKER_PROJECTION, HEALTH_FACILITY_REFER_PICKER_PROJECT
 const ROUTE_LOCATIONS = "location/locations";
 const ROUTE_HEALTH_FACILITIES = "location/healthFacilities";
 const ROUTE_HEALTH_FACILITY_EDIT = "location/healthFacility";
+const ROUTE_HOTSPOTS = "location/hotspots";
+const ROUTE_HOTSPOT_EDIT = "location/hotspot";
 const ROUTE_MICRO_CATCHMENTS = "location/microCatchments";
 const ROUTE_MICRO_CATCHMENT_EDIT = "location/microCatchment";
 
@@ -108,6 +111,8 @@ const DEFAULT_CONFIG = {
     
     { key: "location.route.healthFacility", ref: ROUTE_HEALTH_FACILITY_EDIT },
     { key: "location.route.hotspot", ref: ROUTE_HOTSPOT_EDIT },
+    { key: "location.route.microCatchments", ref: ROUTE_MICRO_CATCHMENTS },
+    { key: "location.route.microCatchment", ref: ROUTE_MICRO_CATCHMENT_EDIT },
   ],
   "core.Router": [
     {
@@ -155,6 +160,9 @@ const DEFAULT_CONFIG = {
       rights: [RIGHT_LOCATIONS],
       icon: "LocalHospital",
     },
+    { path: ROUTE_MICRO_CATCHMENTS, component: MicroCatchmentsPage },
+    { path: ROUTE_MICRO_CATCHMENT_EDIT, component: MicroCatchmentEditPage },
+    { path: ROUTE_MICRO_CATCHMENT_EDIT + "/:microCatchment_uuid?", component: MicroCatchmentEditPage },
     {
       path: ROUTE_MICRO_CATCHMENTS,
       component: MicroCatchmentsPage,
@@ -177,6 +185,13 @@ const DEFAULT_CONFIG = {
   ],
   "admin.MainMenu": [
     {
+      text: <FormattedMessage module="location" id="menu.microCatchments" />,
+      icon: <LocationOn />,
+      route: `/${ROUTE_MICRO_CATCHMENTS}`,
+      id: "location.microCatchments",
+      filter: (rights) => hasMicroCatchmentAccess(rights),
+    },
+    {
       text: <FormattedMessage module="admin" id="menu.locations" />,
       icon: <PinDrop />,
       route: `/${ROUTE_LOCATIONS}`,
@@ -195,6 +210,7 @@ const DEFAULT_CONFIG = {
     {
       text: <FormattedMessage module="admin" id="menu.healthFacilities" />,
       icon: <LocalHospital />,
+      route: `/${ROUTE_HEALTH_FACILITIES}`,
       route: `/${ROUTE_HEALTH_FACILITIES}`,
       id: "admin.healthFacilities",
       filter: (rights) => rights.includes(RIGHT_HEALTH_FACILITIES),

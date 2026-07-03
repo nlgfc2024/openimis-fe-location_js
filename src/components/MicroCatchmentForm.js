@@ -182,10 +182,21 @@ class MicroCatchmentForm extends Component {
                 onChange={(v) => this._updateMC("name", v)}
               />
             </Grid>
-            {/* District */}
+            {isEditing && (
+              <Grid item xs={4} className={classes.item}>
+                <TextInput
+                  module="location"
+                  label="microCatchment.type"
+                  value={microCatchment.type || ""}
+                  readOnly={readOnly}
+                  onChange={(v) => this._updateMC("type", v)}
+                />
+              </Grid>
+            )}
+            {/* District (top level of the Malawi hierarchy = Location type R) */}
             <Grid item xs={4} className={classes.item}>
               <PublishedComponent
-                pubRef="location.DistrictPicker"
+                pubRef="location.RegionPicker"
                 value={district}
                 readOnly={readOnly}
                 required
@@ -231,7 +242,7 @@ class MicroCatchmentForm extends Component {
             <Grid item xs={12} className={classes.item}>
               <PublishedComponent
                 pubRef="location.LocationPicker"
-                locationLevel={2}
+                locationLevel={1}
                 label={formatMessage(intl, "location", "microCatchment.traditionalAuthority")}
                 multiple
                 value={selectedTAs}
@@ -257,7 +268,7 @@ class MicroCatchmentForm extends Component {
             <Grid item xs={12} className={classes.item}>
               <PublishedComponent
                 pubRef="location.LocationPicker"
-                locationLevel={3}
+                locationLevel={2}
                 label={formatMessage(intl, "location", "microCatchment.gvh")}
                 multiple
                 value={selectedGVHs}

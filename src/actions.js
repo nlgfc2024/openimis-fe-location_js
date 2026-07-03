@@ -157,9 +157,8 @@ export function fetchHotspotSummaries(filters) {
     "code",
     "name",
     "description",
-    "microCatchment{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name}}}",
+    "microCatchment{id, uuid, code, name, district{id, uuid, code, name}, traditionalAuthorities{id, location{id, uuid, code, name}}, gvhs{id, location{id, uuid, code, name}}}",
     "villages{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name}}}}",
-    "village{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name}}}}",
     "validityFrom",
     "validityTo",
   ];
@@ -175,9 +174,8 @@ export function fetchHotspot(hotspotUuid, hotspotCode) {
     "code",
     "name",
     "description",
-    "microCatchment{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name}}}",
+    "microCatchment{id, uuid, code, name, district{id, uuid, code, name}, traditionalAuthorities{id, location{id, uuid, code, name}}, gvhs{id, location{id, uuid, code, name}}}",
     "villages{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name}}}}",
-    "village{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name, parent{id, uuid, code, name}}}}",
     "validityFrom",
     "validityTo",
   ];
