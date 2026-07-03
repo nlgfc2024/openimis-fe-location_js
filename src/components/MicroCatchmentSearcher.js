@@ -3,8 +3,9 @@ import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
 import { bindActionCreators } from "redux";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { Button } from "@material-ui/core";
+import { Button, IconButton } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
+import EditIcon from "@material-ui/icons/Edit";
 import {
   Searcher,
   formatMessage,
@@ -21,6 +22,7 @@ import { fetchMicroCatchments, deleteMicroCatchment } from "../actions";
 import MicroCatchmentFilter from "./MicroCatchmentFilter";
 import {
   RIGHT_MICRO_CATCHMENT_DELETE,
+  RIGHT_MICRO_CATCHMENT_EDIT,
   RIGHT_MICRO_CATCHMENT_IMPORT,
   RIGHT_MICRO_CATCHMENT_EXPORT,
 } from "../constants";
@@ -131,6 +133,9 @@ class MicroCatchmentSearcher extends Component {
       "microCatchment.dateFrom",
       "microCatchment.dateTo",
     ];
+    if (this.hasRight(RIGHT_MICRO_CATCHMENT_EDIT)) {
+      result.push(null);
+    }
     if (this.hasRight(RIGHT_MICRO_CATCHMENT_DELETE)) {
       result.push(null);
     }
@@ -156,12 +161,31 @@ class MicroCatchmentSearcher extends Component {
       (mc) => formatDateFromISO(modulesManager, intl, mc.dateFrom),
       (mc) => formatDateFromISO(modulesManager, intl, mc.dateTo),
     ];
+    if (this.hasRight(RIGHT_MICRO_CATCHMENT_EDIT)) {
+      result.push((mc) => (
+        <IconButton
+          size="small"
+          aria-label={formatMessage(intl, "location", "microCatchment.edit.button")}
+          title={formatMessage(intl, "location", "microCatchment.edit.button")}
+          disabled={!!mc.clientMutationId}
+          onClick={() => this.onDoubleClick(mc)}
+        >
+          <EditIcon />
+        </IconButton>
+      ));
+    }
     if (this.hasRight(RIGHT_MICRO_CATCHMENT_DELETE)) {
       result.push((mc) =>
         mc.validityTo ? null : (
-          <Button startIcon={<DeleteIcon />} disabled={!!mc.clientMutationId} onClick={() => this.onDelete(mc)}>
-            {formatMessage(intl, "location", "microCatchment.delete.button")}
-          </Button>
+          <IconButton
+            size="small"
+            aria-label={formatMessage(intl, "location", "microCatchment.delete.button")}
+            title={formatMessage(intl, "location", "microCatchment.delete.button")}
+            disabled={!!mc.clientMutationId}
+            onClick={() => this.onDelete(mc)}
+          >
+            <DeleteIcon />
+          </IconButton>
         ),
       );
     }
@@ -196,6 +220,9 @@ class MicroCatchmentSearcher extends Component {
       ["dateFrom", true],
       ["dateTo", true],
     ];
+    if (this.hasRight(RIGHT_MICRO_CATCHMENT_EDIT)) {
+      result.push(null);
+    }
     if (this.hasRight(RIGHT_MICRO_CATCHMENT_DELETE)) {
       result.push(null);
     }

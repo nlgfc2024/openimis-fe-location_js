@@ -200,6 +200,7 @@
   "microCatchment.edit.page.title": "Edit Micro Catchment",
   "microCatchment.new.page.title": "New Micro Catchment",
   "microCatchment.mutation.label": "Micro Catchment {code}",
+  "microCatchment.edit.button": "Edit",
   "microCatchment.delete.button": "Delete",
   "microCatchment.delete.confirm.title": "Delete Micro Catchment",
   "microCatchment.delete.confirm.message": "Are you sure you want to delete Micro Catchment {code} - {name}?",

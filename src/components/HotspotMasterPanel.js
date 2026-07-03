@@ -12,9 +12,9 @@ class HotspotMasterPanel extends FormPanel {
     super(props);
     const primaryVillage = props.edited?.villages?.[0] || props.edited?.village;
     const microCatchment = props.edited?.microCatchment || primaryVillage?.parent || null;
+    const district = microCatchment?.parent || null;
     this.state = {
-      region: microCatchment?.parent?.parent || null,
-      district: microCatchment?.parent || null,
+      district,
       microCatchment,
     };
   }
@@ -36,26 +36,20 @@ class HotspotMasterPanel extends FormPanel {
   syncSelection = (hotspot) => {
     const primaryVillage = hotspot?.villages?.[0] || hotspot?.village;
     const microCatchment = hotspot?.microCatchment || primaryVillage?.parent || null;
+    const district = microCatchment?.parent || null;
     this.setState({
-      region: microCatchment?.parent?.parent || null,
-      district: microCatchment?.parent || null,
+      district,
       microCatchment,
     });
   };
 
-  updateRegion = (region) => {
-    this.setState({ region, district: null, microCatchment: null });
-    this.updateAttributes({ microCatchment: null, villages: [], village: null });
-  };
-
   updateDistrict = (district) => {
-    this.setState({ region: district?.parent || this.state.region, district, microCatchment: null });
+    this.setState({ district, microCatchment: null });
     this.updateAttributes({ microCatchment: null, villages: [], village: null });
   };
 
   updateMicroCatchment = (microCatchment) => {
     this.setState({
-      region: microCatchment?.parent?.parent || this.state.region,
       district: microCatchment?.parent || this.state.district,
       microCatchment,
     });
@@ -69,7 +63,7 @@ class HotspotMasterPanel extends FormPanel {
 
   render() {
     const { classes, edited, readOnly = false } = this.props;
-    const { region, district, microCatchment } = this.state;
+    const { district, microCatchment } = this.state;
     return (
       <Grid container>
         <ControlledField
@@ -109,29 +103,12 @@ class HotspotMasterPanel extends FormPanel {
         />
         <ControlledField
           module="location"
-          id="Hotspot.region"
-          field={
-            <Grid item xs={2} className={classes.item}>
-              <PublishedComponent
-                pubRef="location.RegionPicker"
-                value={region}
-                label="HotspotForm.region"
-                readOnly={readOnly}
-                withNull={true}
-                onChange={this.updateRegion}
-              />
-            </Grid>
-          }
-        />
-        <ControlledField
-          module="location"
           id="Hotspot.district"
           field={
             <Grid item xs={2} className={classes.item}>
               <PublishedComponent
                 pubRef="location.DistrictPicker"
                 value={district}
-                region={region}
                 label="HotspotForm.district"
                 readOnly={readOnly}
                 withNull={true}

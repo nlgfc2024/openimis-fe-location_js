@@ -429,8 +429,8 @@ function formatHotspotGQL(hotspot) {
     code: "${formatGQLString(hotspot.code)}"
     name: "${formatGQLString(hotspot.name)}"
     ${!!hotspot.description ? `description: "${formatGQLString(hotspot.description)}"` : ""}
-    microCatchmentUuid: "${hotspot.microCatchment.uuid}"
-    villageUuids: [${hotspot.villages.map((village) => `"${village.uuid}"`).join(", ")}]
+    micro_catchment_uuid: "${hotspot.microCatchment.uuid}"
+    village_uuids: [${hotspot.villages.map((village) => `"${village.uuid}"`).join(", ")}]
   `;
 }
 
@@ -610,11 +610,11 @@ function formatMicroCatchmentGQL(mc) {
   const districtId = toDbId(mc.district?.id);
   const taIds = (mc.taIds || []).map((id) => toDbId(id)).filter((id) => id !== null);
   const gvhIds = (mc.gvhIds || []).map((id) => toDbId(id)).filter((id) => id !== null);
+  const normalizedCode = mc.code ? mc.code.trim().toUpperCase() : mc.code;
   return `
     ${mc.uuid !== undefined && mc.uuid !== null ? `uuid: "${mc.uuid}"` : ""}
-    code: "${formatGQLString(mc.code)}"
+    code: "${formatGQLString(normalizedCode)}"
     name: "${formatGQLString(mc.name)}"
-    ${mc.type !== undefined && mc.type !== null ? `type: "${formatGQLString(mc.type)}"` : ""}
     ${districtId !== null ? `districtId: ${districtId}` : ""}
     ${mc.dateFrom !== undefined && mc.dateFrom !== null ? `dateFrom: "${mc.dateFrom}"` : ""}
     ${mc.dateTo !== undefined && mc.dateTo !== null ? `dateTo: "${mc.dateTo}"` : ""}

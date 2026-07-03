@@ -1,8 +1,6 @@
 import React from "react";
-import { FormattedMessage } from "react-intl";
 import LocationOnIcon from "@material-ui/icons/LocationOn";
 import LocationsPage from "./pages/LocationsPage";
-import React from "react";
 import HealthFacilitiesPage from "./pages/HealthFacilitiesPage";
 import HealthFacilityEditPage from "./pages/HealthFacilityEditPage";
 import MicroCatchmentsPage from "./pages/MicroCatchmentsPage";
@@ -157,12 +155,31 @@ const DEFAULT_CONFIG = {
       rights: [RIGHT_LOCATIONS],
       icon: "LocalHospital",
     },
+    {
+      path: ROUTE_MICRO_CATCHMENTS,
+      component: MicroCatchmentsPage,
+      requiredRights: [RIGHT_MICRO_CATCHMENT_ADD, RIGHT_MICRO_CATCHMENT_EDIT, RIGHT_MICRO_CATCHMENT_DELETE],
+      icon: "LocationOn",
+      text: "microCatchments.page.title",
+    },
+    {
+      path: ROUTE_MICRO_CATCHMENT_EDIT,
+      component: MicroCatchmentEditPage,
+      requiredRights: [RIGHT_MICRO_CATCHMENT_ADD],
+      icon: "LocationOn",
+    },
+    {
+      path: ROUTE_MICRO_CATCHMENT_EDIT + "/:microCatchment_uuid?",
+      component: MicroCatchmentEditPage,
+      requiredRights: [RIGHT_MICRO_CATCHMENT_EDIT],
+      icon: "LocationOn",
+    },
   ],
   "admin.MainMenu": [
     {
       text: <FormattedMessage module="admin" id="menu.locations" />,
       icon: <PinDrop />,
-      route: ROUTE_LOCATIONS,
+      route: `/${ROUTE_LOCATIONS}`,
       id: "admin.locations",
       filter: (rights) => rights.includes(RIGHT_LOCATIONS),
       withDivider: true,
@@ -170,7 +187,7 @@ const DEFAULT_CONFIG = {
     {
       text: <FormattedMessage module="location" id="hotspots.page.title" />,
       icon: <LocationOn />,
-      route: ROUTE_HOTSPOTS,
+      route: `/${ROUTE_HOTSPOTS}`,
       id: "admin.hotspots",
       filter: (rights) => rights.includes(RIGHT_LOCATIONS),
       withDivider: true,
@@ -178,17 +195,11 @@ const DEFAULT_CONFIG = {
     {
       text: <FormattedMessage module="admin" id="menu.healthFacilities" />,
       icon: <LocalHospital />,
-      route: ROUTE_HEALTH_FACILITIES,
+      route: `/${ROUTE_HEALTH_FACILITIES}`,
       id: "admin.healthFacilities",
       filter: (rights) => rights.includes(RIGHT_HEALTH_FACILITIES),
       withDivider: true,
     },
-    { path: ROUTE_MICRO_CATCHMENTS, component: MicroCatchmentsPage },
-    { path: ROUTE_MICRO_CATCHMENT_EDIT, component: MicroCatchmentEditPage },
-    { path: ROUTE_MICRO_CATCHMENT_EDIT + "/:microCatchment_uuid?", component: MicroCatchmentEditPage },
-  ],
-  "core.Boot": [UserHealthFacilityLoader, UserDistrictsLoader],
-  "admin.MainMenu": [
     {
       text: <FormattedMessage module="location" id="menu.microCatchments" />,
       icon: <LocationOnIcon />,
@@ -197,6 +208,7 @@ const DEFAULT_CONFIG = {
       filter: (rights) => hasMicroCatchmentAccess(rights),
     },
   ],
+  "core.Boot": [UserHealthFacilityLoader, UserDistrictsLoader],
   "invoice.SubjectAndThirdpartyPicker": [
     {
       type: "health facility",

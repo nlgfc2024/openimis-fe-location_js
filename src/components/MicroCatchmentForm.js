@@ -89,13 +89,15 @@ class MicroCatchmentForm extends Component {
     this.setState({ attemptedSave: true });
     if (!this._canSave()) return;
     const { microCatchment, selectedTAs, selectedGVHs } = this.state;
+    const normalizedCode = microCatchment.code ? microCatchment.code.trim().toUpperCase() : microCatchment.code;
     const payload = {
       ...microCatchment,
+      code: normalizedCode,
       taIds: selectedTAs.map((ta) => ta.id),
       gvhIds: selectedGVHs.map((gvh) => gvh.id),
     };
     const label = formatMessageWithValues(this.props.intl, "location", "microCatchment.mutation.label", {
-      code: microCatchment.code,
+      code: normalizedCode,
     });
     if (microCatchment.uuid) {
       this.props.updateMicroCatchment(payload, label);
@@ -180,17 +182,6 @@ class MicroCatchmentForm extends Component {
                 onChange={(v) => this._updateMC("name", v)}
               />
             </Grid>
-            {isEditing && (
-              <Grid item xs={4} className={classes.item}>
-                <TextInput
-                  module="location"
-                  label="microCatchment.type"
-                  value={microCatchment.type || ""}
-                  readOnly={readOnly}
-                  onChange={(v) => this._updateMC("type", v)}
-                />
-              </Grid>
-            )}
             {/* District */}
             <Grid item xs={4} className={classes.item}>
               <PublishedComponent
