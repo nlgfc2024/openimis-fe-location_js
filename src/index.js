@@ -30,6 +30,7 @@ import LocationPicker from "./pickers/LocationPicker";
 import LocationCascader from "./pickers/LocationCascader";
 import FSPLocationPicker from "./pickers/FSPLocationPicker";
 import LocationTypePicker from "./pickers/LocationTypePicker";
+import MicroCatchmentPicker from "./pickers/MicroCatchmentPicker";
 import messages_en from "./translations/en.json";
 import reducer from "./reducer";
 import {
@@ -89,6 +90,7 @@ const DEFAULT_CONFIG = {
     { key: "location.HealthFacilityGQLType", ref: "HealthFacilityGQLType" },
     { key: "location.HealthFacilityPriceListsPanel", ref: HealthFacilityPriceListsPanel },
     { key: "location.LocationTypePicker", ref: LocationTypePicker },
+    { key: "location.MicroCatchmentPicker", ref: MicroCatchmentPicker },
     { key: "location.LocationGQLType", ref: "LocationGQLType" },
     { key: "location.Location.MaxLevels", ref: "4" },
     { key: "location.LocationsPage", ref: LocationsPage },
