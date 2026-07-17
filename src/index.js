@@ -46,6 +46,7 @@ import {
 
 import { LOCATION_SUMMARY_PROJECTION, nestParentsProjections } from "./utils";
 import { HEALTH_FACILITY_PICKER_PROJECTION, HEALTH_FACILITY_REFER_PICKER_PROJECTION } from "./actions";
+import HotspotVillagesPicker from "./pickers/HotspotVillagesPicker";
 
 const ROUTE_LOCATIONS = "location/locations";
 const ROUTE_HEALTH_FACILITIES = "location/healthFacilities";
@@ -91,6 +92,7 @@ const DEFAULT_CONFIG = {
     { key: "location.HealthFacilityPriceListsPanel", ref: HealthFacilityPriceListsPanel },
     { key: "location.LocationTypePicker", ref: LocationTypePicker },
     { key: "location.MicroCatchmentPicker", ref: MicroCatchmentPicker },
+    { key: "location.HotspotVillagesPicker", ref: HotspotVillagesPicker },
     { key: "location.LocationGQLType", ref: "LocationGQLType" },
     { key: "location.Location.MaxLevels", ref: "4" },
     { key: "location.LocationsPage", ref: LocationsPage },
