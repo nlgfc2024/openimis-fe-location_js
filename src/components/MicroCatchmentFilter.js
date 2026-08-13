@@ -73,7 +73,7 @@ class MicroCatchmentFilter extends Component {
         <Grid item xs={12} sm={6} md={3} className={classes.item}>
           <TextInput
             module="location"
-            label="microCatchment.name"
+            label="microCatchment.nameFilter"
             value={this._filterValue("name")}
             onChange={(v) => this._onChangeStringFilter("name", v)}
           />
@@ -100,24 +100,6 @@ class MicroCatchmentFilter extends Component {
                 v ? `traditionalAuthorities_Location_Uuid: "${v?.uuid}"` : null,
               )
             }
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3} className={classes.item}>
-          <PublishedComponent
-            pubRef="core.DatePicker"
-            module="location"
-            label="microCatchment.dateFrom"
-            value={this._filterValue("dateFrom")}
-            onChange={(v) => this._onChangeStringFilter("dateFrom", v, false)}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3} className={classes.item}>
-          <PublishedComponent
-            pubRef="core.DatePicker"
-            module="location"
-            label="microCatchment.dateTo"
-            value={this._filterValue("dateTo")}
-            onChange={(v) => this._onChangeStringFilter("dateTo", v, false)}
           />
         </Grid>
       </Grid>

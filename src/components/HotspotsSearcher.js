@@ -9,7 +9,6 @@ import {
   withModulesManager,
   formatMessage,
   formatMessageWithValues,
-  formatDateFromISO,
   journalize,
   coreConfirm,
   Searcher,
@@ -52,8 +51,6 @@ class HotspotsSearcher extends Component {
       "hotspotSummaries.microCatchment",
       "hotspotSummaries.villages",
       "hotspotSummaries.description",
-      "hotspotSummaries.validityFrom",
-      "hotspotSummaries.validityTo",
     ];
     if (this.props.rights.includes(RIGHT_LOCATION_EDIT) || this.props.rights.includes(RIGHT_LOCATION_DELETE)) {
       headers.push(null);
@@ -68,8 +65,6 @@ class HotspotsSearcher extends Component {
     ["micro_catchment__code", true],
     null,
     null,
-    ["validityFrom", false],
-    ["validityTo", false],
   ];
 
   itemFormatters = () => {
@@ -80,8 +75,6 @@ class HotspotsSearcher extends Component {
       (hotspot) => (hotspot.microCatchment ? locationLabel(hotspot.microCatchment) : null),
       (hotspot) => (hotspot.villages?.length ? hotspot.villages.map(locationLabel).join(", ") : null),
       (hotspot) => hotspot.description,
-      (hotspot) => formatDateFromISO(this.props.modulesManager, this.props.intl, hotspot.validityFrom),
-      (hotspot) => formatDateFromISO(this.props.modulesManager, this.props.intl, hotspot.validityTo),
     ];
     if (this.props.rights.includes(RIGHT_LOCATION_EDIT) || this.props.rights.includes(RIGHT_LOCATION_DELETE)) {
       formatters.push((hotspot) => {
