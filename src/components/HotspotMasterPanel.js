@@ -38,10 +38,8 @@ class HotspotMasterPanel extends FormPanel {
               <TextInput
                 module="location"
                 label="HotspotForm.code"
-                value={edited.code}
-                required
-                readOnly={readOnly}
-                onChange={(v) => this.updateAttribute("code", v)}
+                value={edited.code || ""}
+                readOnly
               />
             </Grid>
           }

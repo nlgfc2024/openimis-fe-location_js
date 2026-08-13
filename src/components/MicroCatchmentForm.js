@@ -95,7 +95,7 @@ class MicroCatchmentForm extends Component {
       gvhIds: selectedGVHs.map((gvh) => gvh.id),
     };
     const label = formatMessageWithValues(this.props.intl, "location", "microCatchment.mutation.label", {
-      code: microCatchment.code,
+      code: microCatchment.code || "auto",
     });
     if (microCatchment.uuid) {
       this.props.updateMicroCatchment(payload, label);
@@ -134,7 +134,6 @@ class MicroCatchmentForm extends Component {
     const { readOnly = false } = this.props;
     const { microCatchment } = this.state;
     if (readOnly) return false;
-    if (!microCatchment.code) return false;
     if (!microCatchment.name) return false;
     return this._validationErrors().length === 0;
   };
@@ -164,9 +163,7 @@ class MicroCatchmentForm extends Component {
                 module="location"
                 label="microCatchment.code"
                 value={microCatchment.code || ""}
-                required
-                readOnly={readOnly}
-                onChange={(v) => this._updateMC("code", v)}
+                readOnly
               />
             </Grid>
             {/* Name */}
@@ -199,28 +196,6 @@ class MicroCatchmentForm extends Component {
                 readOnly={readOnly}
                 required
                 onChange={(v) => this._updateDistrict(v)}
-              />
-            </Grid>
-            {/* Date From */}
-            <Grid item xs={2} className={classes.item}>
-              <PublishedComponent
-                pubRef="core.DatePicker"
-                module="location"
-                label="microCatchment.dateFrom"
-                value={microCatchment.dateFrom || null}
-                readOnly={readOnly}
-                onChange={(v) => this._updateMC("dateFrom", v)}
-              />
-            </Grid>
-            {/* Date To */}
-            <Grid item xs={2} className={classes.item}>
-              <PublishedComponent
-                pubRef="core.DatePicker"
-                module="location"
-                label="microCatchment.dateTo"
-                value={microCatchment.dateTo || null}
-                readOnly={readOnly}
-                onChange={(v) => this._updateMC("dateTo", v)}
               />
             </Grid>
           </Grid>

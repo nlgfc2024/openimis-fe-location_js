@@ -424,7 +424,7 @@ export function deleteHealthFacility(hf, clientMutationLabel) {
 function formatHotspotGQL(hotspot) {
   return `
     ${hotspot.uuid !== undefined && hotspot.uuid !== null ? `uuid: "${hotspot.uuid}"` : ""}
-    code: "${formatGQLString(hotspot.code)}"
+    ${hotspot.code ? `code: "${formatGQLString(hotspot.code)}"` : ""}
     name: "${formatGQLString(hotspot.name)}"
     ${!!hotspot.description ? `description: "${formatGQLString(hotspot.description)}"` : ""}
     microCatchmentUuid: "${hotspot.microCatchment.uuid}"
@@ -550,8 +550,6 @@ export function fetchMicroCatchments(filters) {
     "code",
     "name",
     "type",
-    "dateFrom",
-    "dateTo",
     "district{id,uuid,code,name}",
     "traditionalAuthorities{id,location{id,uuid,code,name}}",
     "gvhs{id,location{id,uuid,code,name}}",
@@ -570,8 +568,6 @@ export function fetchMicroCatchment(uuid) {
     "code",
     "name",
     "type",
-    "dateFrom",
-    "dateTo",
     "district{id,uuid,code,name}",
     "traditionalAuthorities{id,location{id,uuid,code,name}}",
     "gvhs{id,location{id,uuid,code,name}}",
@@ -610,12 +606,10 @@ function formatMicroCatchmentGQL(mc) {
   const gvhIds = (mc.gvhIds || []).map((id) => toDbId(id)).filter((id) => id !== null);
   return `
     ${mc.uuid !== undefined && mc.uuid !== null ? `uuid: "${mc.uuid}"` : ""}
-    code: "${formatGQLString(mc.code)}"
+    ${mc.code ? `code: "${formatGQLString(mc.code)}"` : ""}
     name: "${formatGQLString(mc.name)}"
     ${mc.type !== undefined && mc.type !== null ? `type: "${formatGQLString(mc.type)}"` : ""}
     ${districtId !== null ? `districtId: ${districtId}` : ""}
-    ${mc.dateFrom !== undefined && mc.dateFrom !== null ? `dateFrom: "${mc.dateFrom}"` : ""}
-    ${mc.dateTo !== undefined && mc.dateTo !== null ? `dateTo: "${mc.dateTo}"` : ""}
     ${taIds.length > 0 ? `taIds: [${taIds.join(",")}]` : ""}
     ${gvhIds.length > 0 ? `gvhIds: [${gvhIds.join(",")}]` : ""}
   `;

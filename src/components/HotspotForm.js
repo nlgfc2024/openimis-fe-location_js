@@ -100,7 +100,6 @@ class HotspotForm extends Component {
 
   canSave = () => {
     if (this.state.isSaved) return false;
-    if (!this.state.hotspot.code) return false;
     if (!this.state.hotspot.name) return false;
     if (!this.state.hotspot.microCatchment) return false;
     if (!this.state.hotspot.villages?.length) return false;
