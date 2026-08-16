@@ -1,7 +1,7 @@
 import React from "react";
 import { Grid } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { ControlledField, FormPanel, TextInput, TextAreaInput } from "@openimis/fe-core";
+import { ControlledField, FormPanel, FormattedMessage, TextInput, TextAreaInput } from "@openimis/fe-core";
 import MicroCatchmentPicker from "../pickers/MicroCatchmentPicker";
 import HotspotVillagesPicker from "../pickers/HotspotVillagesPicker";
 
@@ -40,6 +40,9 @@ class HotspotMasterPanel extends FormPanel {
                 label="HotspotForm.code"
                 value={edited.code || ""}
                 readOnly
+                helperText={
+                  !edited.code ? <FormattedMessage module="location" id="microCatchment.code.generatedOnSave" /> : null
+                }
               />
             </Grid>
           }
@@ -95,12 +98,7 @@ class HotspotMasterPanel extends FormPanel {
           id="Hotspot.tas"
           field={
             <Grid item xs={2} className={classes.item}>
-              <TextInput
-                module="location"
-                label="HotspotForm.tas"
-                value={taNames(microCatchment)}
-                readOnly
-              />
+              <TextInput module="location" label="HotspotForm.tas" value={taNames(microCatchment)} readOnly />
             </Grid>
           }
         />

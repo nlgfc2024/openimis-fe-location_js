@@ -95,7 +95,7 @@ class MicroCatchmentForm extends Component {
       gvhIds: selectedGVHs.map((gvh) => gvh.id),
     };
     const label = formatMessageWithValues(this.props.intl, "location", "microCatchment.mutation.label", {
-      code: microCatchment.code || "auto",
+      code: microCatchment.code || microCatchment.name || "new",
     });
     if (microCatchment.uuid) {
       this.props.updateMicroCatchment(payload, label);
@@ -164,6 +164,11 @@ class MicroCatchmentForm extends Component {
                 label="microCatchment.code"
                 value={microCatchment.code || ""}
                 readOnly
+                helperText={
+                  !microCatchment.code ? (
+                    <FormattedMessage module="location" id="microCatchment.code.generatedOnSave" />
+                  ) : null
+                }
               />
             </Grid>
             {/* Name */}

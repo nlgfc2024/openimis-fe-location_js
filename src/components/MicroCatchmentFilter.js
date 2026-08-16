@@ -73,7 +73,7 @@ class MicroCatchmentFilter extends Component {
         <Grid item xs={12} sm={6} md={3} className={classes.item}>
           <TextInput
             module="location"
-            label="microCatchment.nameFilter"
+            label="microCatchment.name"
             value={this._filterValue("name")}
             onChange={(v) => this._onChangeStringFilter("name", v)}
           />

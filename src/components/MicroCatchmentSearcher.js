@@ -100,7 +100,6 @@ class MicroCatchmentSearcher extends Component {
       this.state.confirmedAction();
       this.setState({ confirmedAction: null });
     }
-
   }
 
   onFiltersApplied = (filters) => {
@@ -225,13 +224,7 @@ class MicroCatchmentSearcher extends Component {
   };
 
   sorts = () => {
-    let result = [
-      ["code", true],
-      ["name", true],
-      ["district", true],
-      null,
-      null,
-    ];
+    let result = [["code", true], ["name", true], ["district", true], null, null];
     if (this.hasRight(RIGHT_MICRO_CATCHMENT_EDIT) || this.hasRight(RIGHT_MICRO_CATCHMENT_DELETE)) {
       result.push(null);
     }
@@ -246,13 +239,8 @@ class MicroCatchmentSearcher extends Component {
     historyPush(this.props.modulesManager, this.props.history, "location.route.microCatchment", [mc.uuid], newTab);
   };
 
-  showMessage = (key, detail) => {
-    const message = formatMessage(this.props.intl, "location", key) || detail;
-    const titleKey = key.includes("missingDistrict")
-      ? "microCatchment.alert.actionRequired"
-      : key.includes("success")
-        ? "microCatchment.alert.success"
-        : "microCatchment.alert.error";
+  showMessage = (titleKey, messageKey, detail) => {
+    const message = formatMessage(this.props.intl, "location", messageKey) || detail;
     this.setState({
       alert: {
         title: formatMessage(this.props.intl, "location", titleKey),
@@ -264,15 +252,16 @@ class MicroCatchmentSearcher extends Component {
   closeAlert = () => this.setState({ alert: null });
 
   getActiveDistrict = () => {
-    // Downloads and uploads must always use the district explicitly selected
-    // in the search criteria; never infer one from results or user access.
-    return this.state.district?.uuid ? this.state.district : null;
+    if (this.state.district?.uuid) return this.state.district;
+    const districts = this.props.userDistricts || [];
+    return districts.length === 1 ? districts[0] : null;
   };
 
   onDownload = async () => {
     const district = this.getActiveDistrict();
     if (!district?.uuid) {
       this.showMessage(
+        "microCatchment.alert.actionRequired",
         "microCatchment.download.missingDistrict",
         "Please select a district before downloading micro catchments.",
       );
@@ -286,7 +275,9 @@ class MicroCatchmentSearcher extends Component {
 
       const response = await fetch(url.toString(), { credentials: "same-origin" });
       if (!response.ok) {
-        throw new Error(formatMessage(this.props.intl, "location", "microCatchment.download.error") || "Download failed.");
+        throw new Error(
+          formatMessage(this.props.intl, "location", "microCatchment.download.error") || "Download failed.",
+        );
       }
       const blob = await response.blob();
       const link = document.createElement("a");
@@ -297,13 +288,21 @@ class MicroCatchmentSearcher extends Component {
       document.body.removeChild(link);
       URL.revokeObjectURL(link.href);
     } catch (error) {
-      this.showMessage("microCatchment.download.error", error?.message || "Download failed.");
+      this.showMessage(
+        "microCatchment.alert.error",
+        "microCatchment.download.error",
+        error?.message || "Download failed.",
+      );
     }
   };
 
   onUploadClick = () => {
     if (!this.getActiveDistrict()?.uuid) {
-      this.showMessage("microCatchment.upload.missingDistrict", "Please select a district before uploading micro catchments.");
+      this.showMessage(
+        "microCatchment.alert.actionRequired",
+        "microCatchment.upload.missingDistrict",
+        "Please select a district before uploading micro catchments.",
+      );
       return;
     }
     this.fileInputRef.current?.click();
@@ -313,6 +312,7 @@ class MicroCatchmentSearcher extends Component {
     const district = this.getActiveDistrict();
     if (!district?.uuid) {
       this.showMessage(
+        "microCatchment.alert.actionRequired",
         "microCatchment.downloadTemplate.missingDistrict",
         "Please select a district before downloading the micro-catchment template.",
       );
@@ -324,7 +324,10 @@ class MicroCatchmentSearcher extends Component {
       url.search = new URLSearchParams({ district_uuid: district.uuid }).toString();
       const response = await fetch(url.toString(), { credentials: "same-origin" });
       if (!response.ok) {
-        throw new Error(formatMessage(this.props.intl, "location", "microCatchment.downloadTemplate.error") || "Template download failed.");
+        throw new Error(
+          formatMessage(this.props.intl, "location", "microCatchment.downloadTemplate.error") ||
+            "Template download failed.",
+        );
       }
       const blob = await response.blob();
       const link = document.createElement("a");
@@ -335,7 +338,11 @@ class MicroCatchmentSearcher extends Component {
       document.body.removeChild(link);
       URL.revokeObjectURL(link.href);
     } catch (error) {
-      this.showMessage("microCatchment.downloadTemplate.error", error?.message || "Template download failed.");
+      this.showMessage(
+        "microCatchment.alert.error",
+        "microCatchment.downloadTemplate.error",
+        error?.message || "Template download failed.",
+      );
     }
   };
 
@@ -345,7 +352,11 @@ class MicroCatchmentSearcher extends Component {
 
     const district = this.getActiveDistrict();
     if (!district?.uuid) {
-      this.showMessage("microCatchment.upload.missingDistrict", "Please select a district before uploading micro catchments.");
+      this.showMessage(
+        "microCatchment.alert.actionRequired",
+        "microCatchment.upload.missingDistrict",
+        "Please select a district before uploading micro catchments.",
+      );
       return;
     }
 
@@ -366,10 +377,18 @@ class MicroCatchmentSearcher extends Component {
         throw new Error(errors);
       }
 
-      this.showMessage("microCatchment.upload.success", "Micro Catchments uploaded successfully.");
+      this.showMessage(
+        "microCatchment.alert.success",
+        "microCatchment.upload.success",
+        "Micro Catchments uploaded successfully.",
+      );
       this.fetch(this.lastQueryParams || []);
     } catch (error) {
-      this.showMessage("microCatchment.upload.error", error?.message || "Micro Catchments upload failed.");
+      this.showMessage(
+        "microCatchment.alert.error",
+        "microCatchment.upload.error",
+        error?.message || "Micro Catchments upload failed.",
+      );
     } finally {
       event.target.value = "";
       this.setState({ uploading: false });
