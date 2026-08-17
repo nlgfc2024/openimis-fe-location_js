@@ -10,7 +10,7 @@ import {
   graphqlWithVariables,
 } from "@openimis/fe-core";
 
-import { LOCATION_SUMMARY_PROJECTION, nestParentsProjections } from "./utils";
+import { getHotspotMutationAction, LOCATION_SUMMARY_PROJECTION, nestParentsProjections } from "./utils";
 
 function _entityAndFilters(entity, filters) {
   return `${entity}${!!filters && filters.length ? `(${filters.join(",")})` : ""}`;
@@ -433,8 +433,8 @@ function formatHotspotGQL(hotspot) {
 }
 
 export function createOrUpdateHotspot(hotspot, clientMutationLabel) {
-  const action = hotspot.uuid !== undefined && hotspot.uuid !== null ? "update" : "create";
-  const mutation = formatMutation("createHotspot", formatHotspotGQL(hotspot), clientMutationLabel);
+  const action = getHotspotMutationAction(hotspot);
+  const mutation = formatMutation(`${action}Hotspot`, formatHotspotGQL(hotspot), clientMutationLabel);
   const requestedDateTime = new Date();
   return graphql(
     mutation.payload,
@@ -657,4 +657,3 @@ export function deleteMicroCatchment(mc, clientMutationLabel) {
     },
   );
 }
-
