@@ -3,7 +3,8 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
 import DeleteIcon from "@material-ui/icons/Delete";
-import { Button } from "@material-ui/core";
+import EditIcon from "@material-ui/icons/Edit";
+import { IconButton, Tooltip } from "@material-ui/core";
 import {
   withModulesManager,
   formatMessage,
@@ -15,7 +16,7 @@ import {
 } from "@openimis/fe-core";
 import HotspotFilter from "./HotspotFilter";
 import { fetchHotspotSummaries, deleteHotspot } from "../actions";
-import { RIGHT_LOCATION_DELETE } from "../constants";
+import { RIGHT_LOCATION_DELETE, RIGHT_LOCATION_EDIT } from "../constants";
 import { locationLabel } from "../utils";
 
 class HotspotsSearcher extends Component {
@@ -54,7 +55,7 @@ class HotspotsSearcher extends Component {
       "hotspotSummaries.validityFrom",
       "hotspotSummaries.validityTo",
     ];
-    if (this.props.rights.includes(RIGHT_LOCATION_DELETE)) {
+    if (this.props.rights.includes(RIGHT_LOCATION_EDIT) || this.props.rights.includes(RIGHT_LOCATION_DELETE)) {
       headers.push(null);
     }
     return headers;
@@ -82,14 +83,42 @@ class HotspotsSearcher extends Component {
       (hotspot) => formatDateFromISO(this.props.modulesManager, this.props.intl, hotspot.validityFrom),
       (hotspot) => formatDateFromISO(this.props.modulesManager, this.props.intl, hotspot.validityTo),
     ];
-    if (this.props.rights.includes(RIGHT_LOCATION_DELETE)) {
-      formatters.push((hotspot) =>
-        hotspot.validityTo ? null : (
-          <Button startIcon={<DeleteIcon />} disabled={!!hotspot.clientMutationId} onClick={() => this.onDelete(hotspot)}>
-            {formatMessage(this.props.intl, "location", "deleteHotspot.buttonText")}
-          </Button>
-        ),
-      );
+    if (this.props.rights.includes(RIGHT_LOCATION_EDIT) || this.props.rights.includes(RIGHT_LOCATION_DELETE)) {
+      formatters.push((hotspot) => {
+        if (hotspot.validityTo) return null;
+        const editLabel = formatMessage(this.props.intl, "location", "editHotspot.buttonText");
+        const deleteLabel = formatMessage(this.props.intl, "location", "deleteHotspot.buttonText");
+        return (
+          <span style={{ display: "inline-flex" }}>
+            {this.props.rights.includes(RIGHT_LOCATION_EDIT) && (
+              <Tooltip title={editLabel}>
+                <span>
+                  <IconButton
+                    aria-label={editLabel}
+                    disabled={!!hotspot.clientMutationId}
+                    onClick={() => this.props.onDoubleClick(hotspot)}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )}
+            {this.props.rights.includes(RIGHT_LOCATION_DELETE) && (
+              <Tooltip title={deleteLabel}>
+                <span>
+                  <IconButton
+                    aria-label={deleteLabel}
+                    disabled={!!hotspot.clientMutationId}
+                    onClick={() => this.onDelete(hotspot)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )}
+          </span>
+        );
+      });
     }
     return formatters;
   };

@@ -6,6 +6,8 @@ import HotspotsPage from "./pages/HotspotsPage";
 import HotspotEditPage from "./pages/HotspotEditPage";
 import MicroCatchmentsPage from "./pages/MicroCatchmentsPage";
 import MicroCatchmentEditPage from "./pages/MicroCatchmentEditPage";
+import CatchmentsPage from "./pages/CatchmentsPage";
+import CatchmentEditPage from "./pages/CatchmentEditPage";
 import { FormattedMessage } from "@openimis/fe-core";
 import { LocalHospital, LocationOn, PinDrop } from "@material-ui/icons";
 import UserHealthFacilityLoader from "./components/UserHealthFacilityLoader";
@@ -46,6 +48,10 @@ import {
   RIGHT_MICRO_CATCHMENT_ADD,
   RIGHT_MICRO_CATCHMENT_EDIT,
   RIGHT_MICRO_CATCHMENT_DELETE,
+  RIGHT_CATCHMENT_SEARCH,
+  RIGHT_CATCHMENT_ADD,
+  RIGHT_CATCHMENT_EDIT,
+  RIGHT_CATCHMENT_DELETE,
 } from "./constants";
 
 import { LOCATION_SUMMARY_PROJECTION, nestParentsProjections } from "./utils";
@@ -59,11 +65,17 @@ const ROUTE_HOTSPOTS = "location/hotspots";
 const ROUTE_HOTSPOT_EDIT = "location/hotspot";
 const ROUTE_MICRO_CATCHMENTS = "location/microCatchments";
 const ROUTE_MICRO_CATCHMENT_EDIT = "location/microCatchment";
+const ROUTE_CATCHMENTS = "location/catchments";
+const ROUTE_CATCHMENT_EDIT = "location/catchment";
 
 const hasRight = (rights, right) => rights.includes(right) || rights.includes(String(right));
 const hasMicroCatchmentAccess = (rights = []) =>
   [RIGHT_MICRO_CATCHMENT_ADD, RIGHT_MICRO_CATCHMENT_EDIT, RIGHT_MICRO_CATCHMENT_DELETE].some((right) =>
-    hasRight(rights, right)
+    hasRight(rights, right),
+  );
+const hasCatchmentAccess = (rights = []) =>
+  [RIGHT_CATCHMENT_SEARCH, RIGHT_CATCHMENT_ADD, RIGHT_CATCHMENT_EDIT, RIGHT_CATCHMENT_DELETE].some((right) =>
+    hasRight(rights, right),
   );
 
 const DEFAULT_CONFIG = {
@@ -112,11 +124,13 @@ const DEFAULT_CONFIG = {
     { key: "location.FSPCoarseLocation", ref: FSPCoarseLocation },
     { key: "location.DetailedLocation", ref: DetailedLocation },
     { key: "location.DetailedHealthFacility", ref: DetailedHealthFacility },
-    
+
     { key: "location.route.healthFacility", ref: ROUTE_HEALTH_FACILITY_EDIT },
     { key: "location.route.hotspot", ref: ROUTE_HOTSPOT_EDIT },
     { key: "location.route.microCatchments", ref: ROUTE_MICRO_CATCHMENTS },
     { key: "location.route.microCatchment", ref: ROUTE_MICRO_CATCHMENT_EDIT },
+    { key: "location.route.catchments", ref: ROUTE_CATCHMENTS },
+    { key: "location.route.catchment", ref: ROUTE_CATCHMENT_EDIT },
   ],
   "core.Router": [
     {
@@ -167,6 +181,13 @@ const DEFAULT_CONFIG = {
     { path: ROUTE_MICRO_CATCHMENTS, component: MicroCatchmentsPage },
     { path: ROUTE_MICRO_CATCHMENT_EDIT, component: MicroCatchmentEditPage },
     { path: ROUTE_MICRO_CATCHMENT_EDIT + "/:microCatchment_uuid?", component: MicroCatchmentEditPage },
+    { path: ROUTE_CATCHMENTS, component: CatchmentsPage, rights: [RIGHT_CATCHMENT_SEARCH] },
+    { path: ROUTE_CATCHMENT_EDIT, component: CatchmentEditPage, rights: [RIGHT_CATCHMENT_ADD] },
+    {
+      path: ROUTE_CATCHMENT_EDIT + "/:catchment_uuid?",
+      component: CatchmentEditPage,
+      rights: [RIGHT_CATCHMENT_SEARCH],
+    },
   ],
   "admin.MainMenu": [
     {
@@ -175,6 +196,13 @@ const DEFAULT_CONFIG = {
       route: `/${ROUTE_MICRO_CATCHMENTS}`,
       id: "location.microCatchments",
       filter: (rights) => hasMicroCatchmentAccess(rights),
+    },
+    {
+      text: <FormattedMessage module="location" id="menu.catchments" />,
+      icon: <LocationOn />,
+      route: `/${ROUTE_CATCHMENTS}`,
+      id: "location.catchments",
+      filter: (rights) => hasCatchmentAccess(rights),
     },
     {
       text: <FormattedMessage module="admin" id="menu.locations" />,

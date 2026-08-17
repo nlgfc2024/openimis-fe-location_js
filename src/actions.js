@@ -65,12 +65,7 @@ export const HEALTH_FACILITY_PICKER_PROJECTION = [
   `location{${LOCATION_SUMMARY_PROJECTION.join(",")}, parent{${LOCATION_SUMMARY_PROJECTION.join(",")}}}`,
 ];
 
-export const HEALTH_FACILITY_REFER_PICKER_PROJECTION = [
-  "id",
-  "uuid",
-  "code",
-  "name"
-];
+export const HEALTH_FACILITY_REFER_PICKER_PROJECTION = ["id", "uuid", "code", "name"];
 
 function healthFacilityFullPath(key, mm, id) {
   let payload = formatPageQuery(
@@ -215,7 +210,7 @@ export function fetchLocations(levels, type, parent) {
   return graphql(payload, `LOCATION_LOCATIONS_${type}`);
 }
 
-export function fetchLocationsStr(mm, level, regions = null, districts = null, parent, str='', first) {
+export function fetchLocationsStr(mm, level, regions = null, districts = null, parent, str = "", first) {
   const types = mm.getConf("fe-location", "Location.types", ["R", "D", "W", "V"]);
   let filters = [`type: "${types[level]}"`, `str: "${str}"`, first && `first: '${first}'`].filter(Boolean);
   if (Boolean(parent)) {
@@ -243,7 +238,7 @@ export function fetchLocationsByUuids(uuids, maxLevel = 4) {
     return { type: "LOCATION_LOCATIONS_BY_UUIDS_EMPTY" };
   }
 
-  const uuidFilters = uuids.map(uuid => `"${uuid}"`).join(',');
+  const uuidFilters = uuids.map((uuid) => `"${uuid}"`).join(",");
   const projections = ["id", "uuid", "type", "code", "name", nestParentsProjections(maxLevel - 1)];
 
   return graphqlWithVariables(
@@ -664,3 +659,69 @@ export function deleteMicroCatchment(mc, clientMutationLabel) {
   );
 }
 
+const CATCHMENT_PROJECTION = [
+  "id",
+  "uuid",
+  "code",
+  "name",
+  "districts{id,uuid,code,name}",
+  "validityFrom",
+  "validityTo",
+];
+
+export function fetchCatchments(filters) {
+  return graphql(formatPageQueryWithCount("catchments", filters, CATCHMENT_PROJECTION), "LOCATION_CATCHMENT_SEARCHER");
+}
+
+export function fetchCatchment(uuid) {
+  const payload = formatPageQueryWithCount(
+    "catchments",
+    [`uuid: \"${uuid}\"`, "showHistory: false"],
+    CATCHMENT_PROJECTION,
+  );
+  return graphql(payload, "LOCATION_CATCHMENT");
+}
+
+export const clearCatchment = () => (dispatch) => dispatch({ type: "LOCATION_CATCHMENT_CLEAR" });
+
+function formatCatchmentGQL(catchment) {
+  const districtIds = (catchment.districts || []).map((district) => toDbId(district.id)).filter((id) => id !== null);
+  return `
+    ${catchment.uuid ? `uuid: \"${catchment.uuid}\"` : ""}
+    code: \"${formatGQLString(catchment.code)}\"
+    name: \"${formatGQLString(catchment.name)}\"
+    districtIds: [${districtIds.join(",")}]
+  `;
+}
+
+function catchmentMutation(action, catchment, clientMutationLabel, responseType) {
+  const mutation = formatMutation(action, formatCatchmentGQL(catchment), clientMutationLabel);
+  return graphql(mutation.payload, ["LOCATION_MUTATION_REQ", responseType, "LOCATION_MUTATION_ERR"], {
+    clientMutationId: mutation.clientMutationId,
+    clientMutationLabel,
+    requestedDateTime: new Date(),
+  });
+}
+
+export const createCatchment = (catchment, label) =>
+  catchmentMutation("createCatchment", catchment, label, "LOCATION_CREATE_CATCHMENT_RESP");
+
+export const updateCatchment = (catchment, label) =>
+  catchmentMutation("updateCatchment", catchment, label, "LOCATION_UPDATE_CATCHMENT_RESP");
+
+export function deleteCatchment(catchment, clientMutationLabel) {
+  const mutation = formatMutation(
+    "deleteCatchment",
+    `uuid: \"${catchment.uuid}\" code: \"${formatGQLString(catchment.code)}\"`,
+    clientMutationLabel,
+  );
+  return graphql(
+    mutation.payload,
+    ["LOCATION_MUTATION_REQ", "LOCATION_DELETE_CATCHMENT_RESP", "LOCATION_MUTATION_ERR"],
+    {
+      clientMutationId: mutation.clientMutationId,
+      clientMutationLabel,
+      requestedDateTime: new Date(),
+    },
+  );
+}

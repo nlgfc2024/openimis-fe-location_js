@@ -19,6 +19,7 @@ const HotspotVillagesPicker = (props) => {
     label,
     placeholder,
     microCatchmentUuid,
+    hotspotUuid,
     filterOptions,
     filterSelectedOptions,
   } = props;
@@ -28,8 +29,8 @@ const HotspotVillagesPicker = (props) => {
 
   const { data, isLoading, error } = useGraphqlQuery(
     `
-    query HotspotEligibleVillages ($microCatchmentUuid: String!) {
-      hotspotEligibleVillages(microCatchmentUuid: $microCatchmentUuid) {
+    query HotspotEligibleVillages ($microCatchmentUuid: String!, $hotspotUuid: String) {
+      hotspotEligibleVillages(microCatchmentUuid: $microCatchmentUuid, hotspotUuid: $hotspotUuid) {
         id
         uuid
         code
@@ -37,7 +38,7 @@ const HotspotVillagesPicker = (props) => {
       }
     }
   `,
-    { microCatchmentUuid },
+    { microCatchmentUuid, hotspotUuid },
     { skip: !microCatchmentUuid },
   );
 

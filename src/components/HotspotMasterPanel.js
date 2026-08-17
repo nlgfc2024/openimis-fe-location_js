@@ -115,6 +115,7 @@ class HotspotMasterPanel extends FormPanel {
                 value={edited.villages || []}
                 label="HotspotForm.villages"
                 microCatchmentUuid={microCatchment?.uuid}
+                hotspotUuid={edited.uuid}
                 readOnly={readOnly}
                 required
                 onChange={this.updateVillages}

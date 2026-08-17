@@ -34,6 +34,7 @@ class HotspotForm extends Component {
     hotspot: this._newHotspot(),
     newHotspot: true,
     isSaved: false,
+    redirectAfterSave: false,
   };
 
   _newHotspot() {
@@ -60,7 +61,17 @@ class HotspotForm extends Component {
       this.setState({ hotspot: this._newHotspot(), lockNew: false, hotspot_uuid: null });
     } else if (prevProps.submittingMutation && !this.props.submittingMutation) {
       this.props.journalize(this.props.mutation);
-      this.setState((state) => ({ reset: state.reset + 1 }));
+      const mutationSucceeded = !!this.props.mutation?.id;
+      if (this.state.redirectAfterSave && mutationSucceeded) {
+        historyPush(this.props.modulesManager, this.props.history, "location.route.hotspots");
+      } else {
+        this.setState((state) => ({
+          reset: state.reset + 1,
+          lockNew: false,
+          isSaved: false,
+          redirectAfterSave: false,
+        }));
+      }
     }
   }
 
@@ -129,11 +140,20 @@ class HotspotForm extends Component {
       hotspot: this._newHotspot(),
       newHotspot: true,
       isSaved: false,
+      redirectAfterSave: false,
     });
   };
 
   _save = (hotspot) => {
-    this.setState({ lockNew: !hotspot.uuid, isSaved: true }, () => this.props.save(hotspot));
+    const isCreating = !hotspot.uuid;
+    this.setState(
+      {
+        lockNew: isCreating,
+        isSaved: true,
+        redirectAfterSave: isCreating,
+      },
+      () => this.props.save(hotspot),
+    );
   };
 
   render() {

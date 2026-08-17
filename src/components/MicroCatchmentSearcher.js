@@ -3,8 +3,9 @@ import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
 import { bindActionCreators } from "redux";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { Button, IconButton, Tooltip } from "@material-ui/core";
+import { IconButton, Tooltip } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
+import EditIcon from "@material-ui/icons/Edit";
 import {
   Searcher,
   formatMessage,
@@ -21,6 +22,7 @@ import { fetchMicroCatchments, deleteMicroCatchment } from "../actions";
 import MicroCatchmentFilter from "./MicroCatchmentFilter";
 import {
   RIGHT_MICRO_CATCHMENT_DELETE,
+  RIGHT_MICRO_CATCHMENT_EDIT,
   RIGHT_MICRO_CATCHMENT_IMPORT,
   RIGHT_MICRO_CATCHMENT_EXPORT,
 } from "../constants";
@@ -131,7 +133,7 @@ class MicroCatchmentSearcher extends Component {
       "microCatchment.dateFrom",
       "microCatchment.dateTo",
     ];
-    if (this.hasRight(RIGHT_MICRO_CATCHMENT_DELETE)) {
+    if (this.hasRight(RIGHT_MICRO_CATCHMENT_EDIT) || this.hasRight(RIGHT_MICRO_CATCHMENT_DELETE)) {
       result.push(null);
     }
     return result;
@@ -156,22 +158,38 @@ class MicroCatchmentSearcher extends Component {
       (mc) => formatDateFromISO(modulesManager, intl, mc.dateFrom),
       (mc) => formatDateFromISO(modulesManager, intl, mc.dateTo),
     ];
-    if (this.hasRight(RIGHT_MICRO_CATCHMENT_DELETE)) {
+    if (this.hasRight(RIGHT_MICRO_CATCHMENT_EDIT) || this.hasRight(RIGHT_MICRO_CATCHMENT_DELETE)) {
       result.push((mc) => {
         if (mc.validityTo) return null;
-        const deleteLabel = formatMessage(intl, "location", "microCatchment.delete.button");
         return (
-          <Tooltip title={deleteLabel}>
-            <span>
-              <IconButton
-                aria-label={deleteLabel}
-                disabled={!!mc.clientMutationId}
-                onClick={() => this.onDelete(mc)}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </span>
-          </Tooltip>
+          <span style={{ display: "inline-flex" }}>
+            {this.hasRight(RIGHT_MICRO_CATCHMENT_EDIT) && (
+              <Tooltip title={formatMessage(intl, "location", "microCatchment.edit.button")}>
+                <span>
+                  <IconButton
+                    aria-label={formatMessage(intl, "location", "microCatchment.edit.button")}
+                    disabled={!!mc.clientMutationId}
+                    onClick={() => this.onDoubleClick(mc)}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )}
+            {this.hasRight(RIGHT_MICRO_CATCHMENT_DELETE) && (
+              <Tooltip title={formatMessage(intl, "location", "microCatchment.delete.button")}>
+                <span>
+                  <IconButton
+                    aria-label={formatMessage(intl, "location", "microCatchment.delete.button")}
+                    disabled={!!mc.clientMutationId}
+                    onClick={() => this.onDelete(mc)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )}
+          </span>
         );
       });
     }
@@ -206,7 +224,7 @@ class MicroCatchmentSearcher extends Component {
       ["dateFrom", true],
       ["dateTo", true],
     ];
-    if (this.hasRight(RIGHT_MICRO_CATCHMENT_DELETE)) {
+    if (this.hasRight(RIGHT_MICRO_CATCHMENT_EDIT) || this.hasRight(RIGHT_MICRO_CATCHMENT_DELETE)) {
       result.push(null);
     }
     return result;
@@ -220,8 +238,11 @@ class MicroCatchmentSearcher extends Component {
     historyPush(this.props.modulesManager, this.props.history, "location.route.microCatchment", [mc.uuid], newTab);
   };
 
-  showMessage = (key, fallback) => {
-    window.alert(formatMessage(this.props.intl, "location", key) || fallback);
+  showMessage = (key, detail) => {
+    const message = formatMessage(this.props.intl, "location", key) || detail;
+    // Append the detail (e.g. the backend's per-row import errors) when it adds
+    // information beyond the generic translated message.
+    window.alert(detail && detail !== message ? `${message}\n\n${detail}` : message);
   };
 
   getActiveDistrict = () => {
@@ -283,6 +304,33 @@ class MicroCatchmentSearcher extends Component {
     this.fileInputRef.current?.click();
   };
 
+  onDownloadTemplate = async () => {
+    const district = this.getActiveDistrict();
+    if (!district?.uuid) {
+      this.showMessage("microCatchment.uploadDownload.missingDistrict", "Please select a district first.");
+      return;
+    }
+
+    try {
+      const url = new URL(`${window.location.origin}${baseApiUrl}/location/micro-catchments/template/`);
+      url.search = new URLSearchParams({ district_uuid: district.uuid }).toString();
+      const response = await fetch(url.toString(), { credentials: "same-origin" });
+      if (!response.ok) {
+        throw new Error(formatMessage(this.props.intl, "location", "microCatchment.downloadTemplate.error") || "Template download failed.");
+      }
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `micro_catchment_template_${district.code || "district"}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    } catch (error) {
+      this.showMessage("microCatchment.downloadTemplate.error", error?.message || "Template download failed.");
+    }
+  };
+
   onUploadFileSelected = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -315,7 +363,7 @@ class MicroCatchmentSearcher extends Component {
     } catch (error) {
       this.showMessage("microCatchment.upload.error", error?.message || "Micro Catchments upload failed.");
     } finally {
-      if (this.fileInputRef.current) this.fileInputRef.current.value = "";
+      event.target.value = "";
       this.setState({ uploading: false });
     }
   };
@@ -329,6 +377,12 @@ class MicroCatchmentSearcher extends Component {
         label: formatMessage(this.props.intl, "location", "microCatchment.download.button"),
         icon: null,
         onClick: this.onDownload,
+      },
+      {
+        authorized: canImport,
+        label: formatMessage(this.props.intl, "location", "microCatchment.downloadTemplate.button"),
+        icon: null,
+        onClick: this.onDownloadTemplate,
       },
       {
         authorized: canImport,
@@ -386,7 +440,7 @@ class MicroCatchmentSearcher extends Component {
         <input
           ref={this.fileInputRef}
           type="file"
-          accept=".xlsx"
+          accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
           onChange={this.onUploadFileSelected}
           style={{ display: "none" }}
         />
