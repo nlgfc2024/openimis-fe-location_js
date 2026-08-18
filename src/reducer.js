@@ -80,6 +80,16 @@ function reducer(
     fetchedMicroCatchment: false,
     microCatchment: null,
     errorMicroCatchment: null,
+    fetchingCatchments: false,
+    fetchedCatchments: false,
+    catchments: [],
+    catchmentsPageInfo: {},
+    catchmentsTotalCount: 0,
+    errorCatchments: null,
+    fetchingCatchment: false,
+    fetchedCatchment: false,
+    catchment: null,
+    errorCatchment: null,
   },
   action,
 ) {
@@ -692,6 +702,70 @@ function reducer(
       return dispatchMutationResp(state, "updateMicroCatchment", action);
     case "LOCATION_DELETE_MICRO_CATCHMENT_RESP":
       return dispatchMutationResp(state, "deleteMicroCatchment", action);
+    case "LOCATION_CATCHMENT_SEARCHER_REQ":
+      return {
+        ...state,
+        fetchingCatchments: true,
+        fetchedCatchments: false,
+        catchments: [],
+        catchmentsPageInfo: {},
+        catchmentsTotalCount: 0,
+        errorCatchments: null,
+      };
+    case "LOCATION_CATCHMENT_SEARCHER_RESP":
+      return {
+        ...state,
+        fetchingCatchments: false,
+        fetchedCatchments: true,
+        catchments: parseData(action.payload.data.catchments),
+        catchmentsPageInfo: pageInfo(action.payload.data.catchments),
+        catchmentsTotalCount: action.payload.data.catchments?.totalCount || 0,
+        errorCatchments: formatGraphQLError(action.payload),
+      };
+    case "LOCATION_CATCHMENT_SEARCHER_ERR":
+      return {
+        ...state,
+        fetchingCatchments: false,
+        errorCatchments: formatServerError(action.payload),
+      };
+    case "LOCATION_CATCHMENT_REQ":
+      return {
+        ...state,
+        fetchingCatchment: true,
+        fetchedCatchment: false,
+        catchment: null,
+        errorCatchment: null,
+      };
+    case "LOCATION_CATCHMENT_RESP": {
+      const records = parseData(action.payload.data.catchments);
+      return {
+        ...state,
+        fetchingCatchment: false,
+        fetchedCatchment: true,
+        catchment: records?.[0] || null,
+        errorCatchment: formatGraphQLError(action.payload),
+      };
+    }
+    case "LOCATION_CATCHMENT_ERR":
+      return {
+        ...state,
+        fetchingCatchment: false,
+        errorCatchment: formatServerError(action.payload),
+      };
+    case "LOCATION_CATCHMENT_CLEAR":
+      return {
+        ...state,
+        fetchingCatchment: false,
+        fetchedCatchment: false,
+        catchment: null,
+        errorCatchment: null,
+      };
+    case "LOCATION_CREATE_CATCHMENT_RESP":
+       return dispatchMutationResp(state, "createCatchment", action);
+    case "LOCATION_UPDATE_CATCHMENT_RESP":
+      return dispatchMutationResp(state, "updateCatchment", action);
+    case "LOCATION_DELETE_CATCHMENT_RESP":
+      return dispatchMutationResp(state, "deleteCatchment", action);
     case "CORE_AUTH_LOGOUT":
       return {
         ...state,
