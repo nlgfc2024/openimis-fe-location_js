@@ -3,14 +3,22 @@ import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
 import { bindActionCreators } from "redux";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { IconButton, Tooltip } from "@material-ui/core";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Tooltip,
+  Typography,
+} from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import {
   Searcher,
   formatMessage,
   formatMessageWithValues,
-  formatDateFromISO,
   baseApiUrl,
   withModulesManager,
   withHistory,
@@ -51,10 +59,22 @@ const styles = (theme) => ({
       fontSize: 14,
     },
   },
+  alertTitle: {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    padding: theme.spacing(2, 3),
+  },
+  alertContent: {
+    minWidth: 380,
+    padding: theme.spacing(3),
+  },
+  alertActions: {
+    padding: theme.spacing(1, 3, 2),
+  },
 });
 
 class MicroCatchmentSearcher extends Component {
-  state = { reset: 0, confirmedAction: null, uploading: false, district: null };
+  state = { reset: 0, confirmedAction: null, uploading: false, district: null, alert: null };
 
   constructor(props) {
     super(props);
@@ -79,13 +99,6 @@ class MicroCatchmentSearcher extends Component {
     } else if (prevProps.confirmed !== this.props.confirmed && this.props.confirmed && this.state.confirmedAction) {
       this.state.confirmedAction();
       this.setState({ confirmedAction: null });
-    }
-
-    if (prevProps.userDistricts !== this.props.userDistricts && !this.state.district) {
-      const firstDistrict = this.props.userDistricts?.[0] || null;
-      if (firstDistrict) {
-        this.setState({ district: firstDistrict });
-      }
     }
   }
 
@@ -130,8 +143,6 @@ class MicroCatchmentSearcher extends Component {
       "microCatchment.district",
       "microCatchment.ta",
       "microCatchment.gvh",
-      "microCatchment.dateFrom",
-      "microCatchment.dateTo",
     ];
     if (this.hasRight(RIGHT_MICRO_CATCHMENT_EDIT) || this.hasRight(RIGHT_MICRO_CATCHMENT_DELETE)) {
       result.push(null);
@@ -140,7 +151,7 @@ class MicroCatchmentSearcher extends Component {
   };
 
   itemFormatters = () => {
-    const { intl, modulesManager, history } = this.props;
+    const { intl } = this.props;
     let result = [
       (mc) => mc.code,
       (mc) => mc.name,
@@ -155,8 +166,6 @@ class MicroCatchmentSearcher extends Component {
           .map((gvh) => gvh?.location?.name)
           .filter(Boolean)
           .join(", "),
-      (mc) => formatDateFromISO(modulesManager, intl, mc.dateFrom),
-      (mc) => formatDateFromISO(modulesManager, intl, mc.dateTo),
     ];
     if (this.hasRight(RIGHT_MICRO_CATCHMENT_EDIT) || this.hasRight(RIGHT_MICRO_CATCHMENT_DELETE)) {
       result.push((mc) => {
@@ -215,15 +224,7 @@ class MicroCatchmentSearcher extends Component {
   };
 
   sorts = () => {
-    let result = [
-      ["code", true],
-      ["name", true],
-      ["district", true],
-      null,
-      null,
-      ["dateFrom", true],
-      ["dateTo", true],
-    ];
+    let result = [["code", true], ["name", true], ["district", true], null, null];
     if (this.hasRight(RIGHT_MICRO_CATCHMENT_EDIT) || this.hasRight(RIGHT_MICRO_CATCHMENT_DELETE)) {
       result.push(null);
     }
@@ -238,39 +239,32 @@ class MicroCatchmentSearcher extends Component {
     historyPush(this.props.modulesManager, this.props.history, "location.route.microCatchment", [mc.uuid], newTab);
   };
 
-  showMessage = (key, detail) => {
-    const message = formatMessage(this.props.intl, "location", key) || detail;
-    // Append the detail (e.g. the backend's per-row import errors) when it adds
-    // information beyond the generic translated message.
-    window.alert(detail && detail !== message ? `${message}\n\n${detail}` : message);
+  showMessage = (titleKey, messageKey, detail) => {
+    const message = formatMessage(this.props.intl, "location", messageKey) || detail;
+    this.setState({
+      alert: {
+        title: formatMessage(this.props.intl, "location", titleKey),
+        message: detail && detail !== message ? `${message}\n\n${detail}` : message,
+      },
+    });
   };
 
+  closeAlert = () => this.setState({ alert: null });
+
   getActiveDistrict = () => {
-    if (this.state.district?.uuid) {
-      return this.state.district;
-    }
-
-    const resultDistricts = (this.props.microCatchments || [])
-      .map((mc) => mc.district)
-      .filter((district) => !!district?.uuid);
-    const uniqueResultDistricts = resultDistricts.filter(
-      (district, index, districts) => districts.findIndex((item) => item.uuid === district.uuid) === index,
-    );
-    if (uniqueResultDistricts.length === 1) {
-      return uniqueResultDistricts[0];
-    }
-
-    if ((this.props.userDistricts || []).length === 1) {
-      return this.props.userDistricts[0];
-    }
-
-    return null;
+    if (this.state.district?.uuid) return this.state.district;
+    const districts = this.props.userDistricts || [];
+    return districts.length === 1 ? districts[0] : null;
   };
 
   onDownload = async () => {
     const district = this.getActiveDistrict();
     if (!district?.uuid) {
-      this.showMessage("microCatchment.uploadDownload.missingDistrict", "Please select a district first.");
+      this.showMessage(
+        "microCatchment.alert.actionRequired",
+        "microCatchment.download.missingDistrict",
+        "Please select a district before downloading micro catchments.",
+      );
       return;
     }
 
@@ -281,7 +275,9 @@ class MicroCatchmentSearcher extends Component {
 
       const response = await fetch(url.toString(), { credentials: "same-origin" });
       if (!response.ok) {
-        throw new Error(formatMessage(this.props.intl, "location", "microCatchment.download.error") || "Download failed.");
+        throw new Error(
+          formatMessage(this.props.intl, "location", "microCatchment.download.error") || "Download failed.",
+        );
       }
       const blob = await response.blob();
       const link = document.createElement("a");
@@ -292,13 +288,21 @@ class MicroCatchmentSearcher extends Component {
       document.body.removeChild(link);
       URL.revokeObjectURL(link.href);
     } catch (error) {
-      this.showMessage("microCatchment.download.error", error?.message || "Download failed.");
+      this.showMessage(
+        "microCatchment.alert.error",
+        "microCatchment.download.error",
+        error?.message || "Download failed.",
+      );
     }
   };
 
   onUploadClick = () => {
     if (!this.getActiveDistrict()?.uuid) {
-      this.showMessage("microCatchment.uploadDownload.missingDistrict", "Please select a district first.");
+      this.showMessage(
+        "microCatchment.alert.actionRequired",
+        "microCatchment.upload.missingDistrict",
+        "Please select a district before uploading micro catchments.",
+      );
       return;
     }
     this.fileInputRef.current?.click();
@@ -307,7 +311,11 @@ class MicroCatchmentSearcher extends Component {
   onDownloadTemplate = async () => {
     const district = this.getActiveDistrict();
     if (!district?.uuid) {
-      this.showMessage("microCatchment.uploadDownload.missingDistrict", "Please select a district first.");
+      this.showMessage(
+        "microCatchment.alert.actionRequired",
+        "microCatchment.downloadTemplate.missingDistrict",
+        "Please select a district before downloading the micro-catchment template.",
+      );
       return;
     }
 
@@ -316,7 +324,10 @@ class MicroCatchmentSearcher extends Component {
       url.search = new URLSearchParams({ district_uuid: district.uuid }).toString();
       const response = await fetch(url.toString(), { credentials: "same-origin" });
       if (!response.ok) {
-        throw new Error(formatMessage(this.props.intl, "location", "microCatchment.downloadTemplate.error") || "Template download failed.");
+        throw new Error(
+          formatMessage(this.props.intl, "location", "microCatchment.downloadTemplate.error") ||
+            "Template download failed.",
+        );
       }
       const blob = await response.blob();
       const link = document.createElement("a");
@@ -327,7 +338,11 @@ class MicroCatchmentSearcher extends Component {
       document.body.removeChild(link);
       URL.revokeObjectURL(link.href);
     } catch (error) {
-      this.showMessage("microCatchment.downloadTemplate.error", error?.message || "Template download failed.");
+      this.showMessage(
+        "microCatchment.alert.error",
+        "microCatchment.downloadTemplate.error",
+        error?.message || "Template download failed.",
+      );
     }
   };
 
@@ -337,7 +352,11 @@ class MicroCatchmentSearcher extends Component {
 
     const district = this.getActiveDistrict();
     if (!district?.uuid) {
-      this.showMessage("microCatchment.uploadDownload.missingDistrict", "Please select a district first.");
+      this.showMessage(
+        "microCatchment.alert.actionRequired",
+        "microCatchment.upload.missingDistrict",
+        "Please select a district before uploading micro catchments.",
+      );
       return;
     }
 
@@ -358,10 +377,18 @@ class MicroCatchmentSearcher extends Component {
         throw new Error(errors);
       }
 
-      this.showMessage("microCatchment.upload.success", "Micro Catchments uploaded successfully.");
+      this.showMessage(
+        "microCatchment.alert.success",
+        "microCatchment.upload.success",
+        "Micro Catchments uploaded successfully.",
+      );
       this.fetch(this.lastQueryParams || []);
     } catch (error) {
-      this.showMessage("microCatchment.upload.error", error?.message || "Micro Catchments upload failed.");
+      this.showMessage(
+        "microCatchment.alert.error",
+        "microCatchment.upload.error",
+        error?.message || "Micro Catchments upload failed.",
+      );
     } finally {
       event.target.value = "";
       this.setState({ uploading: false });
@@ -444,6 +471,24 @@ class MicroCatchmentSearcher extends Component {
           onChange={this.onUploadFileSelected}
           style={{ display: "none" }}
         />
+        <Dialog
+          open={!!this.state.alert}
+          onClose={this.closeAlert}
+          aria-labelledby="micro-catchment-alert-title"
+          maxWidth="sm"
+        >
+          <DialogTitle id="micro-catchment-alert-title" className={classes.alertTitle}>
+            {this.state.alert?.title}
+          </DialogTitle>
+          <DialogContent className={classes.alertContent}>
+            <Typography style={{ whiteSpace: "pre-line" }}>{this.state.alert?.message}</Typography>
+          </DialogContent>
+          <DialogActions className={classes.alertActions}>
+            <Button onClick={this.closeAlert} color="primary" variant="contained" autoFocus>
+              {formatMessage(intl, "location", "microCatchment.alert.ok")}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     );
   }
