@@ -188,7 +188,7 @@ export function fetchLocations(levels, type, parent) {
   let filters = [
     `
     type: "${levels[type]}",
-    orderBy: "code"
+    orderBy: "name"
   `,
   ];
   if (!!parent) {
@@ -472,7 +472,7 @@ export function selectRegionLocation(location) {
 }
 
 export function fetchAllRegions() {
-  let filters = [`type: "R"`];
+  let filters = [`type: "R"`, `orderBy: "name"`];
 
   let payload = formatPageQuery("locations", filters, ["id", "uuid", "code", "name"]);
 
@@ -481,7 +481,7 @@ export function fetchAllRegions() {
 
 export function fetchAvailableLocations(mm, level) {
   const types = mm.getConf("fe-location", "Location.types", ["R", "D", "W", "V"]);
-  let filters = [`type: "${types[level]}"`];
+  let filters = [`type: "${types[level]}"`, `orderBy: "name"`];
 
   let projection = ["id", "uuid", "type", "code", "name", nestParentsProjections(level)];
 
