@@ -1,10 +1,12 @@
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
+import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
+import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Cascader from "rc-cascader";
-import { TextField, Chip } from "@material-ui/core";
+import { TextField, Chip, IconButton, Tooltip } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { useModulesManager, useTranslations } from "@openimis/fe-core";
 import { fetchLocationsStr, fetchLocationsByUuids } from "../actions";
@@ -31,6 +33,27 @@ const styles = () => ({
     },
   },
 });
+
+const sortLocationNodes = (nodes, asc) => {
+  if (!nodes) return nodes;
+  const sorted = [...nodes].sort((a, b) => {
+    const cmp = (a.raw?.name || "").localeCompare(b.raw?.name || "");
+    return asc ? cmp : -cmp;
+  });
+  sorted.forEach((n) => {
+    if (n.children) n.children = sortLocationNodes(n.children, asc);
+  });
+  return sorted;
+};
+
+const rebuildLocationCache = (nodes, cache) => {
+  (nodes || []).forEach((n) => {
+    if (n.children) {
+      cache[n.value] = n.children;
+      rebuildLocationCache(n.children, cache);
+    }
+  });
+};
 
 const extractPathFromValue = (location) => {
   const names = [];
@@ -68,9 +91,15 @@ const LocationCascader = ({
   const [options, setOptions] = useState([]);
   const [locations, setLocations] = useState(multiple ? [] : "");
   const [defaultValue, setDefaultValue] = useState([]);
+  const [sortAsc, setSortAsc] = useState(true);
 
   const locationCache = useRef({}); // { [parentUuid]: [childLocations] }
   const pendingExpansion = useRef(null);
+  const sortAscRef = useRef(sortAsc);
+
+  useEffect(() => {
+    sortAscRef.current = sortAsc;
+  }, [sortAsc]);
 
   // Load top-level locations on mount
   useEffect(() => {
@@ -85,8 +114,19 @@ const LocationCascader = ({
       level: 0,
       raw: loc,
     }));
-    setOptions(l0s);
+    setOptions(sortLocationNodes(l0s, sortAscRef.current));
   }, [locState.l0s]);
+
+  const toggleSort = () => {
+    const next = !sortAsc;
+    setSortAsc(next);
+    setOptions((prev) => {
+      const sorted = sortLocationNodes(prev, next);
+      locationCache.current = {};
+      rebuildLocationCache(sorted, locationCache.current);
+      return sorted;
+    });
+  };
 
   const loadData = (selectedOptions) => {
     const targetOption = selectedOptions[selectedOptions.length - 1];
@@ -108,14 +148,16 @@ const LocationCascader = ({
     const { targetOption, level } = pendingExpansion.current;
     if (!locState[`fetchedL${level}s`]) return;
 
-    const children = locState[`l${level}s`]
-      .map((loc) => ({
+    const children = sortLocationNodes(
+      locState[`l${level}s`].map((loc) => ({
         label: locationLabel(loc),
         value: loc.uuid,
         isLeaf: level + 1 >= maxLevel,
         level,
         raw: loc,
-      }));
+      })),
+      sortAscRef.current,
+    );
 
     targetOption.loading = false;
     targetOption.children = children;
@@ -212,9 +254,27 @@ const LocationCascader = ({
                 ))}
               </div>
             ) : null,
-            endAdornment: (<ArrowDropDownIcon
-              style={{ color: "rgba(0, 0, 0, 0.54)" }}
-            />),
+            endAdornment: (
+              <>
+                {!readOnly && (
+                  <Tooltip
+                    title={formatMessage(sortAsc ? "LocationCascader.sortDescending" : "LocationCascader.sortAscending")}
+                  >
+                    <IconButton
+                      size="small"
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSort();
+                      }}
+                    >
+                      {sortAsc ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />}
+                    </IconButton>
+                  </Tooltip>
+                )}
+                <ArrowDropDownIcon style={{ color: "rgba(0, 0, 0, 0.54)" }} />
+              </>
+            ),
           }}
         />
       </Cascader>
