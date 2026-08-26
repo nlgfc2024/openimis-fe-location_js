@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Autocomplete } from "@material-ui/lab";
-import { TextField } from "@material-ui/core";
+import { IconButton, TextField, Tooltip } from "@material-ui/core";
+import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
+import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { withModulesManager, combine, useTranslations, useDebounceCb } from "@openimis/fe-core";
 import _debounce from "lodash/debounce";
@@ -37,6 +39,7 @@ const LocationPicker = (props) => {
   } = props;
   const [open, setOpen] = useState(false);
   const [resetKey, setResetKey] = useState();
+  const [sortAsc, setSortAsc] = useState(true);
   const { formatMessage } = useTranslations("location", modulesManager);
   const [searchString, setSearchString] = useState("");
   const onInputChange = useDebounceCb(setSearchString, modulesManager.getConf("fe-location", "debounceTime", 400));
@@ -61,6 +64,8 @@ const LocationPicker = (props) => {
     };
   }, []);
 
+  const sortOrderBy = sortAsc ? "name" : "-name";
+
   useEffect(() => {
     if (
       open &&
@@ -68,7 +73,18 @@ const LocationPicker = (props) => {
       searchString.length >= modulesManager.getConf("fe-location", "locationMinCharLookup", 2)
     ) {
       if (parentLocations) {
-        dispatch(fetchParentLocationsStr(modulesManager, locationLevel, parentLocations, searchString, 20));
+        dispatch(
+          fetchParentLocationsStr(
+            modulesManager,
+            locationLevel,
+            parentLocations,
+            searchString,
+            20,
+            undefined,
+            undefined,
+            sortOrderBy,
+          ),
+        );
       } else {
         dispatch(fetchLocationsStr(
           modulesManager,
@@ -77,25 +93,39 @@ const LocationPicker = (props) => {
           districts?.[0]?.uuid,
           parentLocation,
           searchString,
+          undefined,
+          sortOrderBy,
         ));
       }
     }
-  }, [searchString, parentLocation, parentLocations]);
+  }, [searchString, parentLocation, parentLocations, sortOrderBy]);
 
   useEffect(() => {
     if (open) {
       if (parentLocations) {
-        dispatch(fetchParentLocationsStr(modulesManager, locationLevel, parentLocations, searchString, 20));
+        dispatch(
+          fetchParentLocationsStr(
+            modulesManager,
+            locationLevel,
+            parentLocations,
+            searchString,
+            20,
+            undefined,
+            undefined,
+            sortOrderBy,
+          ),
+        );
       } else {
         dispatch(fetchLocationsStr(
           modulesManager, locationLevel, regions?.[0]?.uuid,
           districts?.[0]?.uuid, parentLocation, searchString,
+          undefined, sortOrderBy,
         ));
       }
     } else {
       setSearchString("");
     }
-  }, [open]);
+  }, [open, sortOrderBy]);
 
   useEffect(() => {
     setResetKey(Date.now());
@@ -134,6 +164,30 @@ const LocationPicker = (props) => {
             withPlaceholder ? placeholder || formatMessage(`Location${locationLevel}Picker.placehoder`) : null
           }
           title={title}
+          InputProps={{
+            ...inputProps.InputProps,
+            endAdornment: (
+              <>
+                {!readOnly && (
+                  <Tooltip
+                    title={formatMessage(sortAsc ? "LocationPicker.sortDescending" : "LocationPicker.sortAscending")}
+                  >
+                    <IconButton
+                      size="small"
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSortAsc((prev) => !prev);
+                      }}
+                    >
+                      {sortAsc ? <ArrowUpwardIcon fontSize="small" /> : <ArrowDownwardIcon fontSize="small" />}
+                    </IconButton>
+                  </Tooltip>
+                )}
+                {inputProps.InputProps.endAdornment}
+              </>
+            ),
+          }}
         />
       )}
     />
