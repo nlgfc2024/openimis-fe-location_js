@@ -34,27 +34,6 @@ const styles = () => ({
   },
 });
 
-const sortLocationNodes = (nodes, asc) => {
-  if (!nodes) return nodes;
-  const sorted = [...nodes].sort((a, b) => {
-    const cmp = (a.raw?.name || "").localeCompare(b.raw?.name || "");
-    return asc ? cmp : -cmp;
-  });
-  sorted.forEach((n) => {
-    if (n.children) n.children = sortLocationNodes(n.children, asc);
-  });
-  return sorted;
-};
-
-const rebuildLocationCache = (nodes, cache) => {
-  (nodes || []).forEach((n) => {
-    if (n.children) {
-      cache[n.value] = n.children;
-      rebuildLocationCache(n.children, cache);
-    }
-  });
-};
-
 const extractPathFromValue = (location) => {
   const names = [];
   const uuids = [];
@@ -95,16 +74,13 @@ const LocationCascader = ({
 
   const locationCache = useRef({}); // { [parentUuid]: [childLocations] }
   const pendingExpansion = useRef(null);
-  const sortAscRef = useRef(sortAsc);
 
-  useEffect(() => {
-    sortAscRef.current = sortAsc;
-  }, [sortAsc]);
+  const orderBy = sortAsc ? "name" : "-name";
 
-  // Load top-level locations on mount
+  // Load top-level locations on mount, and whenever sort direction changes
   useEffect(() => {
-    dispatch(fetchLocationsStr(modulesManager, 0));
-  }, []);
+    dispatch(fetchLocationsStr(modulesManager, 0, null, null, undefined, "", undefined, orderBy));
+  }, [orderBy]);
 
   useEffect(() => {
     const l0s = (locState.l0s || []).map((loc) => ({
@@ -114,18 +90,13 @@ const LocationCascader = ({
       level: 0,
       raw: loc,
     }));
-    setOptions(sortLocationNodes(l0s, sortAscRef.current));
+    setOptions(l0s);
   }, [locState.l0s]);
 
   const toggleSort = () => {
-    const next = !sortAsc;
-    setSortAsc(next);
-    setOptions((prev) => {
-      const sorted = sortLocationNodes(prev, next);
-      locationCache.current = {};
-      rebuildLocationCache(sorted, locationCache.current);
-      return sorted;
-    });
+    pendingExpansion.current = null;
+    locationCache.current = {};
+    setSortAsc((prev) => !prev);
   };
 
   const loadData = (selectedOptions) => {
@@ -139,7 +110,9 @@ const LocationCascader = ({
 
     targetOption.loading = true;
     pendingExpansion.current = { targetOption, level: currentLevel + 1 };
-    dispatch(fetchLocationsStr(modulesManager, currentLevel + 1, null, null, targetOption.raw));
+    dispatch(
+      fetchLocationsStr(modulesManager, currentLevel + 1, null, null, targetOption.raw, "", undefined, orderBy),
+    );
   };
 
   useEffect(() => {
@@ -148,16 +121,13 @@ const LocationCascader = ({
     const { targetOption, level } = pendingExpansion.current;
     if (!locState[`fetchedL${level}s`]) return;
 
-    const children = sortLocationNodes(
-      locState[`l${level}s`].map((loc) => ({
-        label: locationLabel(loc),
-        value: loc.uuid,
-        isLeaf: level + 1 >= maxLevel,
-        level,
-        raw: loc,
-      })),
-      sortAscRef.current,
-    );
+    const children = locState[`l${level}s`].map((loc) => ({
+      label: locationLabel(loc),
+      value: loc.uuid,
+      isLeaf: level + 1 >= maxLevel,
+      level,
+      raw: loc,
+    }));
 
     targetOption.loading = false;
     targetOption.children = children;
