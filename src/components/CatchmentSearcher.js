@@ -4,6 +4,7 @@ import { injectIntl } from "react-intl";
 import { bindActionCreators } from "redux";
 import { IconButton, Tooltip } from "@material-ui/core";
 import { withTheme, withStyles } from "@material-ui/core/styles";
+import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import {
@@ -17,7 +18,7 @@ import {
   withModulesManager,
 } from "@openimis/fe-core";
 import { deleteCatchment, fetchCatchments } from "../actions";
-import { RIGHT_CATCHMENT_DELETE, RIGHT_CATCHMENT_EDIT } from "../constants";
+import { RIGHT_CATCHMENT_ADD, RIGHT_CATCHMENT_DELETE, RIGHT_CATCHMENT_EDIT } from "../constants";
 import CatchmentFilter from "./CatchmentFilter";
 
 const styles = (theme) => ({
@@ -133,6 +134,15 @@ class CatchmentSearcher extends Component {
     return sorts;
   };
 
+  searcherActions = () => [
+    {
+      label: formatMessage(this.props.intl, "location", "catchments.searcherAddAction"),
+      icon: <AddIcon />,
+      authorized: this.hasRight(RIGHT_CATCHMENT_ADD),
+      onClick: this.props.onAdd,
+    },
+  ];
+
   render() {
     const {
       catchments,
@@ -169,6 +179,9 @@ class CatchmentSearcher extends Component {
           onDoubleClick={this.onDoubleClick}
           sorts={this.sorts}
           rowDisabled={(selection, row) => !!row.validityTo}
+          enableActionButtons
+          searcherActionsPosition="header-right"
+          searcherActions={this.searcherActions()}
         />
       </div>
     );
