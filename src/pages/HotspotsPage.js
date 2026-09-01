@@ -3,15 +3,12 @@ import { bindActionCreators } from "redux";
 import { injectIntl } from "react-intl";
 import { connect } from "react-redux";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { Fab } from "@material-ui/core";
-import AddIcon from "@material-ui/icons/Add";
 import { withHistory, historyPush, formatMessage, Helmet, clearCurrentPaginationPage } from "@openimis/fe-core";
 import HotspotsSearcher from "../components/HotspotsSearcher";
-import { MODULE_NAME, RIGHT_LOCATION_ADD } from "../constants";
+import { MODULE_NAME } from "../constants";
 
 const styles = (theme) => ({
   page: theme.page,
-  fab: theme.fab,
 });
 
 class HotspotsPage extends Component {
@@ -29,25 +26,17 @@ class HotspotsPage extends Component {
   };
 
   render() {
-    const { classes, rights } = this.props;
+    const { classes } = this.props;
     return (
       <div className={classes.page}>
         <Helmet title={formatMessage(this.props.intl, "location", "hotspots.page.title")} />
-        <HotspotsSearcher onDoubleClick={this.onDoubleClick} />
-        {rights.includes(RIGHT_LOCATION_ADD) && (
-          <div className={classes.fab}>
-            <Fab color="primary" onClick={this.onAdd}>
-              <AddIcon />
-            </Fab>
-          </div>
-        )}
+        <HotspotsSearcher onDoubleClick={this.onDoubleClick} onAdd={this.onAdd} />
       </div>
     );
   }
 }
 
 const mapStateToProps = (state) => ({
-  rights: !!state.core && !!state.core.user && !!state.core.user.i_user ? state.core.user.i_user.rights : [],
   module: state.core?.savedPagination?.module,
 });
 
