@@ -9,6 +9,7 @@ import {
   Form,
   withModulesManager,
   withHistory,
+  coreAlert,
   journalize,
   formatMessageWithValues,
   Helmet,
@@ -62,7 +63,18 @@ class HotspotForm extends Component {
     } else if (prevProps.submittingMutation && !this.props.submittingMutation) {
       this.props.journalize(this.props.mutation);
       const mutationSucceeded = !!this.props.mutation?.id;
-      if (this.state.redirectAfterSave && mutationSucceeded) {
+      if (mutationSucceeded) {
+        this.props.coreAlert(
+          formatMessageWithValues(this.props.intl, "location", "hotspot.alert.success", {
+            code: this.state.hotspot.code,
+          }),
+          formatMessageWithValues(
+            this.props.intl,
+            "location",
+            this.state.hotspot_uuid ? "hotspot.update.success" : "hotspot.create.success",
+            { code: this.state.hotspot.code },
+          ),
+        );
         historyPush(this.props.modulesManager, this.props.history, "location.route.hotspots");
       } else {
         this.setState((state) => ({
@@ -147,9 +159,9 @@ class HotspotForm extends Component {
     const isCreating = !hotspot.uuid;
     this.setState(
       {
-        lockNew: isCreating,
+        lockNew: true,
         isSaved: true,
-        redirectAfterSave: isCreating,
+        redirectAfterSave: true,
       },
       () => this.props.save(hotspot),
     );
@@ -218,7 +230,10 @@ const mapStateToProps = (state) => ({
   mutation: state.loc.mutation,
 });
 
-const mapDispatchToProps = (dispatch) => bindActionCreators({ fetchHotspot, clearHotspot, journalize }, dispatch);
+const mapDispatchToProps = (dispatch) => bindActionCreators(
+  { fetchHotspot, clearHotspot, coreAlert, journalize },
+  dispatch,
+);
 
 export default withHistory(
   withModulesManager(connect(mapStateToProps, mapDispatchToProps)(injectIntl(withTheme(withStyles(styles)(HotspotForm))))),
