@@ -2,6 +2,7 @@ import React, { Component, Fragment } from "react";
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
+import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import { IconButton, Tooltip } from "@material-ui/core";
@@ -15,7 +16,7 @@ import {
 } from "@openimis/fe-core";
 import HotspotFilter from "./HotspotFilter";
 import { fetchHotspotSummaries, deleteHotspot } from "../actions";
-import { RIGHT_LOCATION_DELETE, RIGHT_LOCATION_EDIT } from "../constants";
+import { RIGHT_LOCATION_ADD, RIGHT_LOCATION_DELETE, RIGHT_LOCATION_EDIT } from "../constants";
 import { locationLabel } from "../utils";
 
 class HotspotsSearcher extends Component {
@@ -135,6 +136,15 @@ class HotspotsSearcher extends Component {
 
   rowLocked = (selection, hotspot) => hotspot.clientMutationId;
 
+  searcherActions = () => [
+    {
+      label: formatMessage(this.props.intl, "location", "hotspots.searcherAddAction"),
+      icon: <AddIcon />,
+      authorized: this.props.rights.includes(RIGHT_LOCATION_ADD),
+      onClick: this.props.onAdd,
+    },
+  ];
+
   render() {
     const {
       intl,
@@ -168,6 +178,9 @@ class HotspotsSearcher extends Component {
           itemFormatters={this.itemFormatters}
           sorts={this.sorts}
           onDoubleClick={onDoubleClick}
+          enableActionButtons
+          searcherActionsPosition="header-right"
+          searcherActions={this.searcherActions()}
         />
       </Fragment>
     );
