@@ -191,6 +191,10 @@ class HotspotForm extends Component {
               save={!!save ? this._save : null}
               canSave={this.canSave}
               readOnly={readOnly}
+              canEdit={!!save}
+              onFormSave={this._save}
+              canSaveForm={this.canSave}
+              enableSaveButton={false}
               HeadPanel={HotspotMasterPanel}
               Panels={[]}
               onEditedChanged={this.onEditedChanged}
