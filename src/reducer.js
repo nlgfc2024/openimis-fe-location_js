@@ -605,7 +605,7 @@ function reducer(
     case "LOCATION_CREATE_HOTSPOT_RESP":
       return dispatchMutationResp(state, "createHotspot", action);
     case "LOCATION_UPDATE_HOTSPOT_RESP":
-      return dispatchMutationResp(state, "createHotspot", action);
+      return dispatchMutationResp(state, "updateHotspot", action);
     case "LOCATION_DELETE_HOTSPOT_RESP":
       return dispatchMutationResp(state, "deleteHotspot", action);
     case "LOCATION_LOCATIONS_BY_UUIDS_REQ":
