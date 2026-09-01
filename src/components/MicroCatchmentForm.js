@@ -3,8 +3,8 @@ import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
 import { bindActionCreators } from "redux";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { Grid, Paper, Typography, Divider, Button, Fab } from "@material-ui/core";
-import SaveIcon from "@material-ui/icons/Save";
+import { Grid, Paper, Typography, Divider, Button, IconButton } from "@material-ui/core";
+import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import {
   withModulesManager,
   withHistory,
@@ -27,7 +27,6 @@ const styles = (theme) => ({
   paperDivider: theme.paper.divider,
   item: theme.paper.item,
   lockedPage: theme.page.locked,
-  fab: theme.fab,
 });
 
 class MicroCatchmentForm extends Component {
@@ -159,8 +158,13 @@ class MicroCatchmentForm extends Component {
     return (
       <Fragment>
         <Paper className={classes.paper}>
-          <Grid container className={classes.paperHeader}>
-            <Grid item xs={12}>
+          <Grid container alignItems="center" className={classes.paperHeader}>
+            <Grid item>
+              <IconButton onClick={this.props.back}>
+                <ChevronLeftIcon />
+              </IconButton>
+            </Grid>
+            <Grid item>
               <Typography className={classes.paperHeaderTitle}>
                 <FormattedMessage module="location" id="microCatchment.form.title" />
               </Typography>
@@ -180,7 +184,7 @@ class MicroCatchmentForm extends Component {
               </Grid>
             )}
             {/* Name */}
-            <Grid item xs={5} className={classes.item}>
+            <Grid item xs={isEditing ? 5 : 8} className={classes.item}>
               <TextInput
                 module="location"
                 label="microCatchment.name"
@@ -211,20 +215,7 @@ class MicroCatchmentForm extends Component {
                 onChange={(v) => this._updateDistrict(v)}
               />
             </Grid>
-          </Grid>
-        </Paper>
-
-        {/* Traditional Authorities Panel */}
-        <Paper className={classes.paper} style={{ marginTop: 8 }}>
-          <Grid container className={classes.paperHeader}>
-            <Grid item xs={12}>
-              <Typography className={classes.paperHeaderTitle}>
-                <FormattedMessage module="location" id="microCatchment.form.tas" />
-              </Typography>
-            </Grid>
-          </Grid>
-          <Divider className={classes.paperDivider} />
-          <Grid container className={classes.item} spacing={1}>
+            {/* Traditional Authorities */}
             <Grid item xs={12} className={classes.item}>
               <PublishedComponent
                 pubRef="location.LocationPicker"
@@ -237,20 +228,7 @@ class MicroCatchmentForm extends Component {
                 onChange={(v) => this.setState({ selectedTAs: v || [] })}
               />
             </Grid>
-          </Grid>
-        </Paper>
-
-        {/* GVH Panel */}
-        <Paper className={classes.paper} style={{ marginTop: 8 }}>
-          <Grid container className={classes.paperHeader}>
-            <Grid item xs={12}>
-              <Typography className={classes.paperHeaderTitle}>
-                <FormattedMessage module="location" id="microCatchment.form.gvhs" />
-              </Typography>
-            </Grid>
-          </Grid>
-          <Divider className={classes.paperDivider} />
-          <Grid container className={classes.item} spacing={1}>
+            {/* GVHs */}
             <Grid item xs={12} className={classes.item}>
               <PublishedComponent
                 pubRef="location.LocationPicker"
@@ -264,24 +242,17 @@ class MicroCatchmentForm extends Component {
               />
             </Grid>
           </Grid>
+
+          {!readOnly && (
+            <Grid container spacing={1} className={classes.item}>
+              <Grid item>
+                <Button color="primary" variant="contained" onClick={this._save} disabled={!this._canSave()}>
+                  <FormattedMessage module="location" id="microCatchment.form.save" />
+                </Button>
+              </Grid>
+            </Grid>
+          )}
         </Paper>
-
-        <Grid container spacing={1} style={{ marginTop: 8 }}>
-          <Grid item>
-            <Button variant="outlined" onClick={this.props.back}>
-              <FormattedMessage
-                module="location"
-                id={this.props.microCatchmentUuid ? "location.EditDialog.cancel" : "microCatchment.form.back"}
-              />
-            </Button>
-          </Grid>
-        </Grid>
-
-        {!readOnly && (
-          <Fab color="primary" className={classes.fab} onClick={this._save} disabled={!this._canSave()}>
-            <SaveIcon />
-          </Fab>
-        )}
 
         {attemptedSave && validationErrors.length > 0 && (
           <Paper className={classes.paper} style={{ marginTop: 8, padding: 12, borderLeft: "4px solid #d32f2f" }}>

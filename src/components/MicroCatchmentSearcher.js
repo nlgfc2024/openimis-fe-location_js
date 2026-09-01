@@ -13,6 +13,7 @@ import {
   Tooltip,
   Typography,
 } from "@material-ui/core";
+import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import {
@@ -29,6 +30,7 @@ import {
 import { fetchMicroCatchments, deleteMicroCatchment } from "../actions";
 import MicroCatchmentFilter from "./MicroCatchmentFilter";
 import {
+  RIGHT_MICRO_CATCHMENT_ADD,
   RIGHT_MICRO_CATCHMENT_DELETE,
   RIGHT_MICRO_CATCHMENT_EDIT,
   RIGHT_MICRO_CATCHMENT_IMPORT,
@@ -44,19 +46,24 @@ const styles = (theme) => ({
       paddingTop: theme.spacing(1.5),
       paddingBottom: theme.spacing(1.5),
     },
-    "& .MuiButton-containedPrimary": {
-      backgroundColor: "transparent",
-      boxShadow: "none",
-      color: theme.palette.primary.main,
+    // Compact sizing on every action button so the four of them fit on one row.
+    "& .MuiGrid-item .MuiButton-root": {
       minWidth: "auto",
       padding: theme.spacing(0.75, 1.25),
     },
-    "& .MuiButton-containedPrimary:hover": {
+    "& .MuiGrid-item .MuiButton-root .MuiTypography-body2": {
+      fontSize: 14,
+    },
+    // Only the download/template/upload actions get the low-emphasis look; the "Add" action
+    // (always first) stays the default solid style to match the other modules' Add button.
+    "& .MuiGrid-item:not(:first-child) > .MuiButton-containedPrimary": {
+      backgroundColor: "transparent",
+      boxShadow: "none",
+      color: theme.palette.primary.main,
+    },
+    "& .MuiGrid-item:not(:first-child) > .MuiButton-containedPrimary:hover": {
       backgroundColor: theme.palette.action.hover,
       boxShadow: "none",
-    },
-    "& .MuiButton-containedPrimary .MuiTypography-body2": {
-      fontSize: 14,
     },
   },
   alertTitle: {
@@ -399,6 +406,12 @@ class MicroCatchmentSearcher extends Component {
     const canImport = this.hasRight(RIGHT_MICRO_CATCHMENT_IMPORT);
     const canExport = this.hasRight(RIGHT_MICRO_CATCHMENT_EXPORT);
     return [
+      {
+        authorized: this.hasRight(RIGHT_MICRO_CATCHMENT_ADD),
+        label: formatMessage(this.props.intl, "location", "microCatchments.searcherAddAction"),
+        icon: <AddIcon />,
+        onClick: this.props.onAdd,
+      },
       {
         authorized: canExport,
         label: formatMessage(this.props.intl, "location", "microCatchment.download.button"),

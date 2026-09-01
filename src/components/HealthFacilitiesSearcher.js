@@ -3,6 +3,7 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
 import _ from "lodash";
+import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import {
   withModulesManager,
@@ -17,7 +18,7 @@ import {
 import HealthFacilityFilter from "./HealthFacilityFilter";
 import { fetchHealthFacilitySummaries, deleteHealthFacility } from "../actions";
 import { Button } from "@material-ui/core";
-import { RIGHT_HEALTH_FACILITY_DELETE } from "../constants";
+import { RIGHT_HEALTH_FACILITY_ADD, RIGHT_HEALTH_FACILITY_DELETE } from "../constants";
 
 class HealthFacilitiesSearcher extends Component {
   state = { reset: 0, confirmedAction: null };
@@ -147,6 +148,15 @@ class HealthFacilitiesSearcher extends Component {
 
   rowLocked = (selection, hf) => hf.clientMutationId;
 
+  searcherActions = () => [
+    {
+      label: formatMessage(this.props.intl, "location", "healthFacilities.searcherAddAction"),
+      icon: <AddIcon />,
+      authorized: this.props.rights.includes(RIGHT_HEALTH_FACILITY_ADD),
+      onClick: this.props.onAdd,
+    },
+  ];
+
   render() {
     const {
       intl,
@@ -181,6 +191,9 @@ class HealthFacilitiesSearcher extends Component {
           rowDisabled={this.rowDisabled}
           sorts={this.sorts}
           onDoubleClick={onDoubleClick}
+          enableActionButtons
+          searcherActionsPosition="header-right"
+          searcherActions={this.searcherActions()}
         />
       </Fragment>
     );

@@ -3,8 +3,7 @@ import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
 import { bindActionCreators } from "redux";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { Button, Divider, Fab, Grid, Paper, Typography } from "@material-ui/core";
-import SaveIcon from "@material-ui/icons/Save";
+import { Button, Divider, Grid, Paper, Typography } from "@material-ui/core";
 import {
   FormattedMessage,
   PublishedComponent,
@@ -23,7 +22,6 @@ const styles = (theme) => ({
   paperHeaderTitle: theme.paper.title,
   paperDivider: theme.paper.divider,
   item: theme.paper.item,
-  fab: theme.fab,
 });
 
 class CatchmentForm extends Component {
@@ -161,13 +159,14 @@ class CatchmentForm extends Component {
               <FormattedMessage module="location" id="catchment.form.back" />
             </Button>
           </Grid>
+          {!readOnly && (
+            <Grid item>
+              <Button color="primary" variant="contained" onClick={this.save} disabled={!this.canSave()}>
+                <FormattedMessage module="location" id="catchment.form.save" />
+              </Button>
+            </Grid>
+          )}
         </Grid>
-
-        {!readOnly && (
-          <Fab color="primary" className={classes.fab} onClick={this.save} disabled={!this.canSave()}>
-            <SaveIcon />
-          </Fab>
-        )}
 
         {attemptedSave && errors.length > 0 && (
           <Paper className={classes.paper} style={{ marginTop: 8, padding: 12, borderLeft: "4px solid #d32f2f" }}>
