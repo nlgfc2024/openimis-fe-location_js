@@ -178,6 +178,16 @@ export function fetchHotspot(hotspotUuid, hotspotCode) {
   return graphql(payload, "LOCATION_HOTSPOT");
 }
 
+export function fetchCreatedHotspot(microCatchmentUuid, villageUuid) {
+  const filters = [
+    `microCatchment_Uuid: "${microCatchmentUuid}"`,
+    `villageLinks_Location_Uuid: "${villageUuid}"`,
+  ];
+  const projections = ["id", "uuid", "code", "name"];
+  const payload = formatPageQuery("hotspots", filters, projections);
+  return graphql(payload, "LOCATION_CREATED_HOTSPOT");
+}
+
 export function clearHotspot() {
   return (dispatch) => {
     dispatch({ type: "LOCATION_HOTSPOT_CLEAR" });
@@ -581,6 +591,16 @@ export function fetchMicroCatchment(uuid) {
   const filters = [`uuid: "${uuid}"`, "showHistory: false"];
   const payload = formatPageQueryWithCount("microCatchments", filters, projections);
   return graphql(payload, "LOCATION_MICRO_CATCHMENT");
+}
+
+export function fetchCreatedMicroCatchment(districtUuid, name) {
+  const filters = [
+    `district_Uuid: "${districtUuid}"`,
+    `name_Iexact: "${formatGQLString(name)}"`,
+    "showHistory: false",
+  ];
+  const payload = formatPageQuery("microCatchments", filters, ["id", "uuid", "code", "name"]);
+  return graphql(payload, "LOCATION_CREATED_MICRO_CATCHMENT");
 }
 
 export function clearMicroCatchment() {

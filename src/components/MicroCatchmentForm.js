@@ -16,8 +16,15 @@ import {
   PublishedComponent,
   TextInput,
   FormattedMessage,
+  parseData,
 } from "@openimis/fe-core";
-import { createMicroCatchment, updateMicroCatchment, fetchMicroCatchment, clearMicroCatchment } from "../actions";
+import {
+  createMicroCatchment,
+  updateMicroCatchment,
+  fetchMicroCatchment,
+  fetchCreatedMicroCatchment,
+  clearMicroCatchment,
+} from "../actions";
 
 const styles = (theme) => ({
   paper: theme.paper.paper,
@@ -61,20 +68,45 @@ class MicroCatchmentForm extends Component {
     if (prevProps.submittingMutation && !this.props.submittingMutation) {
       this.props.journalize(this.props.mutation);
       if (this.props.mutation?.id) {
-        this.props.coreAlert(
-          formatMessage(this.props.intl, "location", "microCatchment.alert.success"),
-          formatMessage(
-            this.props.intl,
-            "location",
-            this.props.microCatchmentUuid
-              ? "microCatchment.update.success"
-              : "microCatchment.create.success",
-          ),
-        );
-        historyPush(this.props.modulesManager, this.props.history, "location.route.microCatchments");
+        this.showSuccessAlert();
       }
     }
   }
+
+  showSuccessAlert = async () => {
+    const isUpdate = !!this.props.microCatchmentUuid;
+    let savedMicroCatchment = this.state.microCatchment;
+
+    if (!isUpdate) {
+      const districtUuid = savedMicroCatchment.district?.uuid;
+      if (districtUuid && savedMicroCatchment.name) {
+        for (let attempt = 0; attempt < 12 && !savedMicroCatchment.code; attempt += 1) {
+          try {
+            const response = await this.props.fetchCreatedMicroCatchment(districtUuid, savedMicroCatchment.name);
+            const createdMicroCatchments = parseData(response?.payload?.data?.microCatchments) || [];
+            if (createdMicroCatchments.length) savedMicroCatchment = createdMicroCatchments[0];
+          } catch (error) {
+            // A transient lookup error must not suppress the success alert.
+          }
+          if (!savedMicroCatchment.code) {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+          }
+        }
+      }
+    }
+
+    const displayCode = savedMicroCatchment.code || savedMicroCatchment.name || "";
+    this.props.coreAlert(
+      formatMessage(this.props.intl, "location", "microCatchment.alert.success"),
+      formatMessageWithValues(
+        this.props.intl,
+        "location",
+        isUpdate ? "microCatchment.update.success" : "microCatchment.create.success",
+        { code: displayCode },
+      ),
+    );
+    historyPush(this.props.modulesManager, this.props.history, "location.route.microCatchments");
+  };
 
   componentWillUnmount() {
     this.props.clearMicroCatchment();
@@ -284,6 +316,7 @@ const mapDispatchToProps = (dispatch) =>
   bindActionCreators(
     {
       fetchMicroCatchment,
+      fetchCreatedMicroCatchment,
       clearMicroCatchment,
       createMicroCatchment,
       updateMicroCatchment,
