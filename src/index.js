@@ -1,4 +1,6 @@
 import LocationsPage from "./pages/LocationsPage";
+import ClustersPage from "./pages/ClustersPage";
+import ClusterEditPage from "./pages/ClusterEditPage";
 import React from "react";
 import HealthFacilitiesPage from "./pages/HealthFacilitiesPage";
 import HealthFacilityEditPage from "./pages/HealthFacilityEditPage";
@@ -52,6 +54,10 @@ import {
   RIGHT_CATCHMENT_ADD,
   RIGHT_CATCHMENT_EDIT,
   RIGHT_CATCHMENT_DELETE,
+  RIGHT_CLUSTER_SEARCH,
+  RIGHT_CLUSTER_ADD,
+  RIGHT_CLUSTER_EDIT,
+  RIGHT_CLUSTER_DELETE,
 } from "./constants";
 
 import { LOCATION_SUMMARY_PROJECTION, nestParentsProjections } from "./utils";
@@ -78,10 +84,17 @@ const hasCatchmentAccess = (rights = []) =>
     hasRight(rights, right),
   );
 
+const hasClusterAccess = (rights = []) =>
+  [RIGHT_CLUSTER_SEARCH, RIGHT_CLUSTER_ADD, RIGHT_CLUSTER_EDIT, RIGHT_CLUSTER_DELETE].some((right) =>
+    hasRight(rights, right),
+  );
+
 const DEFAULT_CONFIG = {
   "translations": [{ key: "en", messages: messages_en }],
   "reducers": [{ key: "loc", reducer: reducer }], // location is the default used by syncHistoryWithStore...
   "refs": [
+    { key: "location.route.clusters", ref: "location/clusters" },
+    { key: "location.route.cluster", ref: "location/cluster" },
     { key: "location.route.healthFacilities", ref: ROUTE_HEALTH_FACILITIES },
     { key: "location.route.healthFacilityEdit", ref: ROUTE_HEALTH_FACILITY_EDIT },
     { key: "location.route.hotspots", ref: ROUTE_HOTSPOTS },
@@ -133,6 +146,9 @@ const DEFAULT_CONFIG = {
     { key: "location.route.catchment", ref: ROUTE_CATCHMENT_EDIT },
   ],
   "core.Router": [
+    { path: "location/clusters", component: ClustersPage, rights: [RIGHT_CLUSTER_SEARCH] },
+    { path: "location/cluster", component: ClusterEditPage, rights: [RIGHT_CLUSTER_ADD] },
+    { path: "location/cluster/:cluster_uuid", component: ClusterEditPage, rights: [RIGHT_CLUSTER_SEARCH] },
     {
       path: ROUTE_LOCATIONS,
       component: LocationsPage,
@@ -190,6 +206,13 @@ const DEFAULT_CONFIG = {
     },
   ],
   "admin.MainMenu": [
+    {
+      text: <FormattedMessage module="location" id="cluster.title" />,
+      icon: <LocationOn />,
+      route: "/location/clusters",
+      id: "location.clusters",
+      filter: (rights) => hasClusterAccess(rights),
+    },
     {
       text: <FormattedMessage module="location" id="menu.microCatchments" />,
       icon: <LocationOn />,
