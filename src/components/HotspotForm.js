@@ -16,7 +16,7 @@ import {
   parseData,
   historyPush,
 } from "@openimis/fe-core";
-import { fetchHotspot, clearHotspot } from "../actions";
+import { fetchHotspot, fetchCreatedHotspot, clearHotspot } from "../actions";
 import HotspotMasterPanel from "./HotspotMasterPanel";
 
 const HOTSPOT_FORM_CONTRIBUTION_KEY = "location.Hotspot";
@@ -64,18 +64,7 @@ class HotspotForm extends Component {
       this.props.journalize(this.props.mutation);
       const mutationSucceeded = !!this.props.mutation?.id;
       if (mutationSucceeded) {
-        this.props.coreAlert(
-          formatMessageWithValues(this.props.intl, "location", "hotspot.alert.success", {
-            code: this.state.hotspot.code,
-          }),
-          formatMessageWithValues(
-            this.props.intl,
-            "location",
-            this.state.hotspot_uuid ? "hotspot.update.success" : "hotspot.create.success",
-            { code: this.state.hotspot.code },
-          ),
-        );
-        historyPush(this.props.modulesManager, this.props.history, "location.route.hotspots");
+        this.showSuccessAlert();
       } else {
         this.setState((state) => ({
           reset: state.reset + 1,
@@ -86,6 +75,46 @@ class HotspotForm extends Component {
       }
     }
   }
+
+  showSuccessAlert = async () => {
+    const isUpdate = !!this.state.hotspot_uuid;
+    let savedHotspot = this.state.hotspot;
+
+    if (!isUpdate) {
+      const microCatchmentUuid = savedHotspot.microCatchment?.uuid;
+      const villageUuid = savedHotspot.villages?.[0]?.uuid;
+      if (microCatchmentUuid && villageUuid) {
+        // The mutation can finish asynchronously. Retry briefly until the
+        // backend-generated hotspot code is visible through GraphQL.
+        for (let attempt = 0; attempt < 12 && !savedHotspot.code; attempt += 1) {
+          try {
+            const response = await this.props.fetchCreatedHotspot(microCatchmentUuid, villageUuid);
+            const createdHotspots = parseData(response?.payload?.data?.hotspots) || [];
+            if (createdHotspots.length) savedHotspot = createdHotspots[0];
+          } catch (error) {
+            // A transient lookup error must not suppress the success alert.
+          }
+          if (!savedHotspot.code) {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+          }
+        }
+      }
+    }
+
+    const displayCode = savedHotspot.code || savedHotspot.name || "";
+    this.props.coreAlert(
+      formatMessageWithValues(this.props.intl, "location", "hotspot.alert.success", {
+        code: displayCode,
+      }),
+      formatMessageWithValues(
+        this.props.intl,
+        "location",
+        isUpdate ? "hotspot.update.success" : "hotspot.create.success",
+        { code: displayCode },
+      ),
+    );
+    historyPush(this.props.modulesManager, this.props.history, "location.route.hotspots");
+  };
 
   componentWillUnmount() {
     this.props.clearHotspot();
@@ -231,7 +260,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => bindActionCreators(
-  { fetchHotspot, clearHotspot, coreAlert, journalize },
+  { fetchHotspot, fetchCreatedHotspot, clearHotspot, coreAlert, journalize },
   dispatch,
 );
 

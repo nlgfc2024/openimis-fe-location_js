@@ -12,6 +12,7 @@ import {
   formatMessageWithValues,
   journalize,
   coreConfirm,
+  coreAlert,
   Searcher,
 } from "@openimis/fe-core";
 import HotspotFilter from "./HotspotFilter";
@@ -20,7 +21,7 @@ import { RIGHT_LOCATION_ADD, RIGHT_LOCATION_DELETE, RIGHT_LOCATION_EDIT } from "
 import { locationLabel } from "../utils";
 
 class HotspotsSearcher extends Component {
-  state = { reset: 0, confirmedAction: null };
+  state = { reset: 0, confirmedAction: null, pendingDelete: null };
 
   constructor(props) {
     super(props);
@@ -33,12 +34,30 @@ class HotspotsSearcher extends Component {
     this.defaultPageSize = props.modulesManager.getConf("fe-location", "hotspotFilter.defaultPageSize", 10);
   }
 
+  fetch = (params) => {
+    this.lastQueryParams = params;
+    return this.props.fetchHotspotSummaries(params);
+  };
+
   componentDidUpdate(prevProps) {
     if (prevProps.submittingMutation && !this.props.submittingMutation) {
       this.props.journalize(this.props.mutation);
-      this.setState((prevState) => ({ ...prevState, reset: prevState.reset + 1 }));
+      if (this.state.pendingDelete && this.props.mutation?.id) {
+        this.props.coreAlert(
+          formatMessage(this.props.intl, "location", "hotspot.alert.success"),
+          formatMessageWithValues(this.props.intl, "location", "hotspot.delete.success", {
+            code: this.state.pendingDelete.code,
+          }),
+        );
+        if (this.lastQueryParams) this.fetch(this.lastQueryParams);
+      }
+      this.setState((prevState) => ({
+        reset: prevState.reset + 1,
+        pendingDelete: null,
+      }));
     } else if (prevProps.confirmed !== this.props.confirmed && !!this.props.confirmed && !!this.state.confirmedAction) {
       this.state.confirmedAction();
+      this.setState({ confirmedAction: null });
     }
   }
 
@@ -126,11 +145,13 @@ class HotspotsSearcher extends Component {
           name: hotspot.name,
         }),
       );
-    const confirmedAction = () =>
+    const confirmedAction = () => {
+      this.setState({ pendingDelete: hotspot });
       this.props.deleteHotspot(
         hotspot,
         formatMessageWithValues(this.props.intl, "location", "DeleteHotspot.mutationLabel", { code: hotspot.code }),
       );
+    };
     this.setState({ confirmedAction }, confirm);
   };
 
@@ -162,7 +183,7 @@ class HotspotsSearcher extends Component {
           module="location"
           rowsPerPageOptions={this.rowsPerPageOptions}
           defaultPageSize={this.defaultPageSize}
-          fetch={this.props.fetchHotspotSummaries}
+          fetch={this.fetch}
           reset={this.state.reset}
           cacheFiltersKey="locationHotspotsSearcher"
           items={hotspots}
@@ -200,6 +221,6 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) =>
-  bindActionCreators({ fetchHotspotSummaries, deleteHotspot, coreConfirm, journalize }, dispatch);
+  bindActionCreators({ fetchHotspotSummaries, deleteHotspot, coreConfirm, coreAlert, journalize }, dispatch);
 
 export default withModulesManager(injectIntl(connect(mapStateToProps, mapDispatchToProps)(HotspotsSearcher)));

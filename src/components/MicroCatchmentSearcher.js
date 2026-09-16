@@ -26,6 +26,7 @@ import {
   historyPush,
   journalize,
   coreConfirm,
+  coreAlert,
 } from "@openimis/fe-core";
 import { fetchMicroCatchments, deleteMicroCatchment } from "../actions";
 import MicroCatchmentFilter from "./MicroCatchmentFilter";
@@ -81,7 +82,7 @@ const styles = (theme) => ({
 });
 
 class MicroCatchmentSearcher extends Component {
-  state = { reset: 0, confirmedAction: null, uploading: false, district: null, alert: null };
+  state = { reset: 0, confirmedAction: null, pendingDelete: null, uploading: false, district: null, alert: null };
 
   constructor(props) {
     super(props);
@@ -102,7 +103,16 @@ class MicroCatchmentSearcher extends Component {
   componentDidUpdate(prevProps) {
     if (prevProps.submittingMutation && !this.props.submittingMutation) {
       this.props.journalize(this.props.mutation);
-      this.setState((state) => ({ reset: state.reset + 1 }));
+      if (this.state.pendingDelete && this.props.mutation?.id) {
+        this.props.coreAlert(
+          formatMessage(this.props.intl, "location", "microCatchment.alert.success"),
+          formatMessageWithValues(this.props.intl, "location", "microCatchment.delete.success", {
+            code: this.state.pendingDelete.code,
+          }),
+        );
+        if (this.lastQueryParams) this.fetch(this.lastQueryParams);
+      }
+      this.setState((state) => ({ reset: state.reset + 1, pendingDelete: null }));
     } else if (prevProps.confirmed !== this.props.confirmed && this.props.confirmed && this.state.confirmedAction) {
       this.state.confirmedAction();
       this.setState({ confirmedAction: null });
@@ -213,11 +223,13 @@ class MicroCatchmentSearcher extends Component {
   };
 
   onDelete = (mc) => {
-    const confirmedAction = () =>
+    const confirmedAction = () => {
+      this.setState({ pendingDelete: mc });
       this.props.deleteMicroCatchment(
         mc,
         formatMessageWithValues(this.props.intl, "location", "microCatchment.delete.mutationLabel", { code: mc.code }),
       );
+    };
 
     this.setState({ confirmedAction }, () =>
       this.props.coreConfirm(
@@ -522,7 +534,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) =>
-  bindActionCreators({ fetchMicroCatchments, deleteMicroCatchment, coreConfirm, journalize }, dispatch);
+  bindActionCreators({ fetchMicroCatchments, deleteMicroCatchment, coreConfirm, coreAlert, journalize }, dispatch);
 
 export default withModulesManager(
   withHistory(
