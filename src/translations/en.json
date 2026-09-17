@@ -248,6 +248,7 @@
   "catchments.searcher.title": "{count} Catchments Found",
   "catchment.search": "Catchment",
   "catchment.code": "Code",
+  "catchment.code.hint.generatedOnSave": "Generated on save",
   "catchment.name": "Name",
   "catchment.district": "District",
   "catchment.districts": "Districts",

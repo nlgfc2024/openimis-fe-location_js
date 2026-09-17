@@ -8,6 +8,7 @@ import {
   FormattedMessage,
   PublishedComponent,
   TextInput,
+  formatMessage,
   formatMessageWithValues,
   historyPush,
   journalize,
@@ -67,7 +68,6 @@ class CatchmentForm extends Component {
   validationErrors = () => {
     const { catchment } = this.state;
     const errors = [];
-    if (!catchment.code?.trim()) errors.push("Catchment code is required.");
     if (!catchment.name?.trim()) errors.push("Catchment name is required.");
     if (!catchment.districts?.length) errors.push("At least one District is required.");
     return errors;
@@ -112,9 +112,9 @@ class CatchmentForm extends Component {
                 module="location"
                 label="catchment.code"
                 value={catchment.code || ""}
-                required
-                readOnly={readOnly}
-                onChange={(code) => this.update("code", code)}
+                readOnly
+                inputProps={{ readOnly: true }}
+                helperText={catchment.uuid ? "" : formatMessage(this.props.intl, "location", "catchment.code.hint.generatedOnSave")}
               />
             </Grid>
             <Grid item xs={12} sm={8} className={classes.item}>
