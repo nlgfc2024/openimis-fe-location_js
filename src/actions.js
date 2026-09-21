@@ -709,7 +709,7 @@ function formatCatchmentGQL(catchment) {
   const districtIds = (catchment.districts || []).map((district) => toDbId(district.id)).filter((id) => id !== null);
   return `
     ${catchment.uuid ? `uuid: \"${catchment.uuid}\"` : ""}
-    code: \"${formatGQLString(catchment.code)}\"
+    ${catchment.code ? `code: \"${formatGQLString(catchment.code)}\"` : ""}
     name: \"${formatGQLString(catchment.name)}\"
     districtIds: [${districtIds.join(",")}]
   `;
