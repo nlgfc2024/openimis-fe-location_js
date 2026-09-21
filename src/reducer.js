@@ -25,6 +25,15 @@ function reducer(
     fetchedHealthFacility: false,
     healthFacility: null,
     errorHealthFacility: null,
+    fetchingZones: false,
+    fetchedZones: false,
+    zones: null,
+    zonesPageInfo: {},
+    errorZones: null,
+    fetchingZone: false,
+    fetchedZone: false,
+    zone: null,
+    errorZone: null,
     fetchingHotspots: false,
     fetchedHotspots: false,
     hotspots: null,
@@ -215,6 +224,67 @@ function reducer(
         healthFacility: null,
         errorHealthFacility: null,
       };
+    case "LOCATION_ZONE_SEARCHER_REQ":
+      return {
+        ...state,
+        fetchingZones: true,
+        fetchedZones: false,
+        zones: null,
+        zonesPageInfo: { totalCount: 0 },
+        errorZones: null,
+      };
+    case "LOCATION_ZONE_SEARCHER_RESP":
+      return {
+        ...state,
+        fetchingZones: false,
+        fetchedZones: true,
+        zones: parseData(action.payload.data.zones),
+        zonesPageInfo: pageInfo(action.payload.data.zones),
+        errorZones: formatGraphQLError(action.payload),
+      };
+    case "LOCATION_ZONE_SEARCHER_ERR":
+      return {
+        ...state,
+        fetchingZones: false,
+        errorZones: formatServerError(action.payload),
+      };
+    case "LOCATION_ZONE_REQ":
+      return {
+        ...state,
+        fetchingZone: true,
+        fetchedZone: false,
+        zone: null,
+        errorZone: null,
+      };
+    case "LOCATION_ZONE_RESP":
+      const zones = parseData(action.payload.data.zones);
+      return {
+        ...state,
+        fetchingZone: false,
+        fetchedZone: true,
+        zone: !!zones && zones.length > 0 ? zones[0] : null,
+        errorZone: formatGraphQLError(action.payload),
+      };
+    case "LOCATION_ZONE_ERR":
+      return {
+        ...state,
+        fetchingZone: false,
+        errorZone: formatServerError(action.payload),
+      };
+    case "LOCATION_ZONE_CLEAR":
+      return {
+        ...state,
+        fetchingZone: false,
+        fetchedZone: false,
+        zone: null,
+        errorZone: null,
+      };
+    case "LOCATION_CREATE_ZONE_RESP":
+      return dispatchMutationResp(state, "createZone", action);
+    case "LOCATION_UPDATE_ZONE_RESP":
+      return dispatchMutationResp(state, "updateZone", action);
+    case "LOCATION_DELETE_ZONE_RESP":
+      return dispatchMutationResp(state, "deleteZone", action);
     case "LOCATION_HOTSPOT_SEARCHER_REQ":
       return {
         ...state,
@@ -769,6 +839,16 @@ function reducer(
     case "CORE_AUTH_LOGOUT":
       return {
         ...state,
+        fetchingZones: false,
+        fetchedZones: false,
+        zones: null,
+        zonesPageInfo: {},
+        errorZones: null,
+        fetchingZone: false,
+        fetchedZone: false,
+        zone: null,
+        errorZone: null,
+
         fetchingHealthFacilityFullPath: false,
         fetchedHealthFacilityFullPath: false,
         healthFacilityFullPath: null,

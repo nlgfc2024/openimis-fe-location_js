@@ -1,3 +1,8 @@
+import ClustersPage from "./pages/ClustersPage";
+import ClusterEditPage from "./pages/ClusterEditPage";
+import ZonesPage from "./pages/ZonesPage";
+import ZoneEditPage from "./pages/ZoneEditPage";
+import ClusterPicker from "./pickers/ClusterPicker";
 import LocationsPage from "./pages/LocationsPage";
 import React from "react";
 import HealthFacilitiesPage from "./pages/HealthFacilitiesPage";
@@ -40,6 +45,17 @@ import MicroCatchmentPicker from "./pickers/MicroCatchmentPicker";
 import messages_en from "./translations/en.json";
 import reducer from "./reducer";
 import {
+  RIGHT_CLUSTER_SEARCH,
+  RIGHT_CLUSTER_ADD,
+  RIGHT_CLUSTER_EDIT,
+  RIGHT_CLUSTER_DELETE,
+  RIGHT_ZONE_SEARCH,
+  RIGHT_ZONE_ADD,
+  RIGHT_ZONE_EDIT,
+  RIGHT_ZONE_DELETE,
+  RIGHT_HOTSPOT_SEARCH,
+  RIGHT_HOTSPOT_ADD,
+  RIGHT_HOTSPOT_EDIT,
   RIGHT_LOCATIONS,
   RIGHT_LOCATION_ADD,
   RIGHT_LOCATION_EDIT,
@@ -58,6 +74,8 @@ import { LOCATION_SUMMARY_PROJECTION, nestParentsProjections } from "./utils";
 import { HEALTH_FACILITY_PICKER_PROJECTION, HEALTH_FACILITY_REFER_PICKER_PROJECTION } from "./actions";
 import HotspotVillagesPicker from "./pickers/HotspotVillagesPicker";
 
+const ROUTE_ZONES = "location/zones";
+const ROUTE_ZONE_EDIT = "location/zone";
 const ROUTE_LOCATIONS = "location/locations";
 const ROUTE_HEALTH_FACILITIES = "location/healthFacilities";
 const ROUTE_HEALTH_FACILITY_EDIT = "location/healthFacility";
@@ -82,6 +100,13 @@ const DEFAULT_CONFIG = {
   "translations": [{ key: "en", messages: messages_en }],
   "reducers": [{ key: "loc", reducer: reducer }], // location is the default used by syncHistoryWithStore...
   "refs": [
+    { key: "location.route.clusters", ref: "location/clusters" },
+    { key: "location.route.cluster", ref: "location/cluster" },
+    { key: "location.route.zones", ref: ROUTE_ZONES },
+    { key: "location.route.zone", ref: ROUTE_ZONE_EDIT },
+    { key: "location.route.zoneEdit", ref: ROUTE_ZONE_EDIT },
+    { key: "location.ClusterPicker", ref: ClusterPicker },
+    { key: "location.ZonesPage", ref: ZonesPage },
     { key: "location.route.healthFacilities", ref: ROUTE_HEALTH_FACILITIES },
     { key: "location.route.healthFacilityEdit", ref: ROUTE_HEALTH_FACILITY_EDIT },
     { key: "location.route.hotspots", ref: ROUTE_HOTSPOTS },
@@ -133,6 +158,12 @@ const DEFAULT_CONFIG = {
     { key: "location.route.catchment", ref: ROUTE_CATCHMENT_EDIT },
   ],
   "core.Router": [
+    { path: "location/clusters", component: ClustersPage, rights: [RIGHT_CLUSTER_SEARCH] },
+    { path: "location/cluster", component: ClusterEditPage, rights: [RIGHT_CLUSTER_ADD] },
+    { path: "location/cluster/:cluster_uuid", component: ClusterEditPage, rights: [RIGHT_CLUSTER_SEARCH] },
+    { path: ROUTE_ZONES, component: ZonesPage, rights: [RIGHT_ZONE_SEARCH], icon: "LocationOn", text: "zones.page.title" },
+    { path: ROUTE_ZONE_EDIT, component: ZoneEditPage, rights: [RIGHT_ZONE_ADD], icon: "LocationOn" },
+    { path: ROUTE_ZONE_EDIT + "/:zone_uuid", component: ZoneEditPage, rights: [RIGHT_ZONE_SEARCH], icon: "LocationOn" },
     {
       path: ROUTE_LOCATIONS,
       component: LocationsPage,
@@ -143,20 +174,20 @@ const DEFAULT_CONFIG = {
     {
       path: ROUTE_HOTSPOTS,
       component: HotspotsPage,
-      rights: [RIGHT_LOCATIONS],
+      rights: [RIGHT_HOTSPOT_SEARCH],
       icon: "LocationOn",
       text: "location.hotspots.page.title",
     },
     {
       path: ROUTE_HOTSPOT_EDIT,
       component: HotspotEditPage,
-      rights: [RIGHT_LOCATION_ADD],
+      rights: [RIGHT_HOTSPOT_ADD],
       icon: "LocationOn",
     },
     {
       path: ROUTE_HOTSPOT_EDIT + "/:hotspot_uuid?",
       component: HotspotEditPage,
-      rights: [RIGHT_LOCATION_EDIT],
+      rights: [RIGHT_HOTSPOT_EDIT],
       icon: "LocationOn",
     },
     {
@@ -191,6 +222,21 @@ const DEFAULT_CONFIG = {
   ],
   "admin.MainMenu": [
     {
+      text: <FormattedMessage module="location" id="cluster.title" />,
+      icon: <LocationOn />,
+      route: "/location/clusters",
+      id: "location.clusters",
+      filter: (rights) => hasRight(rights, RIGHT_CLUSTER_SEARCH),
+    },
+    {
+      text: <FormattedMessage module="location" id="zones.page.title" />,
+      icon: <LocationOn />,
+      route: `/${ROUTE_ZONES}`,
+      id: "admin.zones",
+      filter: (rights) => hasRight(rights, RIGHT_ZONE_SEARCH),
+      withDivider: true,
+    },
+    {
       text: <FormattedMessage module="location" id="menu.microCatchments" />,
       icon: <LocationOn />,
       route: `/${ROUTE_MICRO_CATCHMENTS}`,
@@ -217,7 +263,7 @@ const DEFAULT_CONFIG = {
       icon: <LocationOn />,
       route: `/${ROUTE_HOTSPOTS}`,
       id: "admin.hotspots",
-      filter: (rights) => rights.includes(RIGHT_LOCATIONS),
+      filter: (rights) => hasRight(rights, RIGHT_HOTSPOT_SEARCH),
       withDivider: true,
     },
     {
