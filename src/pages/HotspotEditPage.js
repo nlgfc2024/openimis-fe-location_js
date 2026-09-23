@@ -5,7 +5,7 @@ import { bindActionCreators } from "redux";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { formatMessageWithValues, withModulesManager, withHistory, historyPush } from "@openimis/fe-core";
 import { createOrUpdateHotspot } from "../actions";
-import { RIGHT_LOCATION_ADD, RIGHT_LOCATION_EDIT } from "../constants";
+import { RIGHT_HOTSPOT_ADD, RIGHT_HOTSPOT_EDIT } from "../constants";
 import HotspotForm from "../components/HotspotForm";
 
 const styles = (theme) => ({
@@ -36,8 +36,8 @@ class HotspotEditPage extends Component {
         <HotspotForm
           hotspot_uuid={hotspot_uuid}
           back={() => historyPush(modulesManager, history, "location.route.hotspots")}
-          add={rights.includes(RIGHT_LOCATION_ADD) ? this.add : null}
-          save={rights.includes(RIGHT_LOCATION_EDIT) ? this.save : null}
+          add={rights.includes(RIGHT_HOTSPOT_ADD) ? this.add : null}
+          save={rights.includes(RIGHT_HOTSPOT_EDIT) ? this.save : null}
         />
       </div>
     );

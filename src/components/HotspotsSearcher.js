@@ -17,7 +17,7 @@ import {
 } from "@openimis/fe-core";
 import HotspotFilter from "./HotspotFilter";
 import { fetchHotspotSummaries, deleteHotspot } from "../actions";
-import { RIGHT_LOCATION_ADD, RIGHT_LOCATION_DELETE, RIGHT_LOCATION_EDIT } from "../constants";
+import { RIGHT_HOTSPOT_ADD, RIGHT_HOTSPOT_DELETE, RIGHT_HOTSPOT_EDIT } from "../constants";
 import { locationLabel } from "../utils";
 
 class HotspotsSearcher extends Component {
@@ -72,7 +72,7 @@ class HotspotsSearcher extends Component {
       "hotspotSummaries.villages",
       "hotspotSummaries.description",
     ];
-    if (this.props.rights.includes(RIGHT_LOCATION_EDIT) || this.props.rights.includes(RIGHT_LOCATION_DELETE)) {
+    if (this.props.rights.includes(RIGHT_HOTSPOT_EDIT) || this.props.rights.includes(RIGHT_HOTSPOT_DELETE)) {
       headers.push(null);
     }
     return headers;
@@ -96,14 +96,14 @@ class HotspotsSearcher extends Component {
       (hotspot) => (hotspot.villages?.length ? hotspot.villages.map(locationLabel).join(", ") : null),
       (hotspot) => hotspot.description,
     ];
-    if (this.props.rights.includes(RIGHT_LOCATION_EDIT) || this.props.rights.includes(RIGHT_LOCATION_DELETE)) {
+    if (this.props.rights.includes(RIGHT_HOTSPOT_EDIT) || this.props.rights.includes(RIGHT_HOTSPOT_DELETE)) {
       formatters.push((hotspot) => {
         if (hotspot.validityTo) return null;
         const editLabel = formatMessage(this.props.intl, "location", "editHotspot.buttonText");
         const deleteLabel = formatMessage(this.props.intl, "location", "deleteHotspot.buttonText");
         return (
           <span style={{ display: "inline-flex" }}>
-            {this.props.rights.includes(RIGHT_LOCATION_EDIT) && (
+            {this.props.rights.includes(RIGHT_HOTSPOT_EDIT) && (
               <Tooltip title={editLabel}>
                 <span>
                   <IconButton
@@ -116,7 +116,7 @@ class HotspotsSearcher extends Component {
                 </span>
               </Tooltip>
             )}
-            {this.props.rights.includes(RIGHT_LOCATION_DELETE) && (
+            {this.props.rights.includes(RIGHT_HOTSPOT_DELETE) && (
               <Tooltip title={deleteLabel}>
                 <span>
                   <IconButton
@@ -161,7 +161,7 @@ class HotspotsSearcher extends Component {
     {
       label: formatMessage(this.props.intl, "location", "hotspots.searcherAddAction"),
       icon: <AddIcon />,
-      authorized: this.props.rights.includes(RIGHT_LOCATION_ADD),
+      authorized: this.props.rights.includes(RIGHT_HOTSPOT_ADD),
       onClick: this.props.onAdd,
     },
   ];
