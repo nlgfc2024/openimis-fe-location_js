@@ -58,14 +58,15 @@ const LocationCascader = ({
   classes,
   value,
   multiple = false,
+  maxLevel: maxLevelProp,
+  required = false,
 }) => {
   const modulesManager = useModulesManager();
   const { formatMessage } = useTranslations("location", modulesManager);
   const dispatch = useDispatch();
   const locState = useSelector((state) => state.loc);
-  const maxLevel = parseInt(
-    modulesManager.getConf("location", "Location.MaxLevels", 4)
-  );
+  const maxLevel =
+    maxLevelProp ?? parseInt(modulesManager.getConf("location", "Location.MaxLevels", 4));
 
   const [options, setOptions] = useState([]);
   const [locations, setLocations] = useState(multiple ? [] : "");
@@ -207,6 +208,7 @@ const LocationCascader = ({
           label={label || formatMessage("LocationPicker.label")}
           value={multiple ? "" : locations}
           fullWidth
+          required={required}
           disabled={readOnly}
           InputProps={{
             readOnly: true,
