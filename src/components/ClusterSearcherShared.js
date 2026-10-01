@@ -138,6 +138,7 @@ class ClusterSearcherShared extends Component {
     label: formatMessage(this.props.intl, "location", "cluster.add"),
     icon: <AddIcon />,
     onClick: this.props.onAdd,
+    variant: "contained",
   }];
 
   render() {

@@ -416,19 +416,13 @@ class MicroCatchmentSearcher extends Component {
 
   searcherActions = () => {
     const canImport = this.hasRight(RIGHT_MICRO_CATCHMENT_IMPORT);
-    const canExport = this.hasRight(RIGHT_MICRO_CATCHMENT_EXPORT);
     return [
       {
         authorized: this.hasRight(RIGHT_MICRO_CATCHMENT_ADD),
         label: formatMessage(this.props.intl, "location", "microCatchments.searcherAddAction"),
         icon: <AddIcon />,
         onClick: this.props.onAdd,
-      },
-      {
-        authorized: canExport,
-        label: formatMessage(this.props.intl, "location", "microCatchment.download.button"),
-        icon: null,
-        onClick: this.onDownload,
+        variant: "contained",
       },
       {
         authorized: canImport,

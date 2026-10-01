@@ -139,6 +139,7 @@ class CatchmentSearcher extends Component {
       label: formatMessage(this.props.intl, "location", "catchments.searcherAddAction"),
       icon: <AddIcon />,
       authorized: this.hasRight(RIGHT_CATCHMENT_ADD),
+      variant: "contained",
       onClick: this.props.onAdd,
     },
   ];

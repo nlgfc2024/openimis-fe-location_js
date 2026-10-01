@@ -162,6 +162,7 @@ class HotspotsSearcher extends Component {
       label: formatMessage(this.props.intl, "location", "hotspots.searcherAddAction"),
       icon: <AddIcon />,
       authorized: this.props.rights.includes(RIGHT_HOTSPOT_ADD),
+      variant: "contained",
       onClick: this.props.onAdd,
     },
   ];
