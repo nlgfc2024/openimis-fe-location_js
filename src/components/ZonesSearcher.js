@@ -165,6 +165,7 @@ class ZonesSearcher extends Component {
       label: formatMessage(this.props.intl, "location", "zones.searcherAddAction"),
       icon: <AddIcon />,
       authorized: this.props.rights.includes(RIGHT_ZONE_ADD),
+      variant: "contained",
       onClick: this.props.onAdd,
     },
   ];

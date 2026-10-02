@@ -153,6 +153,7 @@ class HealthFacilitiesSearcher extends Component {
       label: formatMessage(this.props.intl, "location", "healthFacilities.searcherAddAction"),
       icon: <AddIcon />,
       authorized: this.props.rights.includes(RIGHT_HEALTH_FACILITY_ADD),
+      variant: "contained",
       onClick: this.props.onAdd,
     },
   ];

@@ -14,8 +14,11 @@ import {
   Typography,
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
+import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
+import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
+import GetAppIcon from "@material-ui/icons/GetApp";
 import {
   Searcher,
   formatMessage,
@@ -46,25 +49,6 @@ const styles = (theme) => ({
       fontSize: 16,
       paddingTop: theme.spacing(1.5),
       paddingBottom: theme.spacing(1.5),
-    },
-    // Compact sizing on every action button so the four of them fit on one row.
-    "& .MuiGrid-item .MuiButton-root": {
-      minWidth: "auto",
-      padding: theme.spacing(0.75, 1.25),
-    },
-    "& .MuiGrid-item .MuiButton-root .MuiTypography-body2": {
-      fontSize: 14,
-    },
-    // Only the download/template/upload actions get the low-emphasis look; the "Add" action
-    // (always first) stays the default solid style to match the other modules' Add button.
-    "& .MuiGrid-item:not(:first-child) > .MuiButton-containedPrimary": {
-      backgroundColor: "transparent",
-      boxShadow: "none",
-      color: theme.palette.primary.main,
-    },
-    "& .MuiGrid-item:not(:first-child) > .MuiButton-containedPrimary:hover": {
-      backgroundColor: theme.palette.action.hover,
-      boxShadow: "none",
     },
   },
   alertTitle: {
@@ -416,31 +400,34 @@ class MicroCatchmentSearcher extends Component {
 
   searcherActions = () => {
     const canImport = this.hasRight(RIGHT_MICRO_CATCHMENT_IMPORT);
-    const canExport = this.hasRight(RIGHT_MICRO_CATCHMENT_EXPORT);
     return [
       {
         authorized: this.hasRight(RIGHT_MICRO_CATCHMENT_ADD),
         label: formatMessage(this.props.intl, "location", "microCatchments.searcherAddAction"),
         icon: <AddIcon />,
         onClick: this.props.onAdd,
+        variant: "contained",
       },
       {
-        authorized: canExport,
+        authorized: this.hasRight(RIGHT_MICRO_CATCHMENT_EXPORT),
         label: formatMessage(this.props.intl, "location", "microCatchment.download.button"),
-        icon: null,
+        icon: <GetAppIcon />,
         onClick: this.onDownload,
+        variant: "outlined",
       },
       {
         authorized: canImport,
         label: formatMessage(this.props.intl, "location", "microCatchment.downloadTemplate.button"),
-        icon: null,
+        icon: <CloudDownloadIcon />,
         onClick: this.onDownloadTemplate,
+        variant: "outlined",
       },
       {
         authorized: canImport,
         label: formatMessage(this.props.intl, "location", "microCatchment.upload.button"),
-        icon: null,
+        icon: <CloudUploadIcon />,
         onClick: this.onUploadClick,
+        variant: "outlined",
       },
     ];
   };
