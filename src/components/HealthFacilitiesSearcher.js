@@ -192,8 +192,7 @@ class HealthFacilitiesSearcher extends Component {
           rowDisabled={this.rowDisabled}
           sorts={this.sorts}
           onDoubleClick={onDoubleClick}
-          enableActionButtons
-          searcherActionsPosition="header-right"
+          enableHeaderActionButtons
           searcherActions={this.searcherActions()}
         />
       </Fragment>

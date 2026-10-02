@@ -152,7 +152,7 @@ class ClusterSearcherShared extends Component {
           headers={this.headers} itemFormatters={this.itemFormatters} filtersToQueryParams={this.filtersToQueryParams}
           rowsPerPageOptions={this.rowsPerPageOptions} defaultPageSize={this.defaultPageSize}
           rowIdentifier={(cluster) => cluster.uuid} onDoubleClick={this.props.onDoubleClick}
-          searcherActionsPosition="header-right" searcherActions={this.searcherActions()} />
+          enableHeaderActionButtons searcherActions={this.searcherActions()} />
       </div>
     );
   }

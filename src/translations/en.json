@@ -184,7 +184,7 @@
   "microCatchment.delete.confirm.message": "Are you sure you want to delete Micro Catchment {code} - {name}?",
   "microCatchment.delete.mutationLabel": "Delete Micro Catchment {code}",
   "microCatchment.delete.success": "Micro Catchment {code} deleted successfully.",
-  "microCatchment.download.button": "Export",
+  "microCatchment.download.button": "Download",
   "microCatchment.download.error": "Micro Catchments download failed.",
   "microCatchment.upload.button": "Upload",
   "microCatchment.downloadTemplate.button": "Download Template",

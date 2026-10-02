@@ -200,8 +200,7 @@ class HotspotsSearcher extends Component {
           itemFormatters={this.itemFormatters}
           sorts={this.sorts}
           onDoubleClick={onDoubleClick}
-          enableActionButtons
-          searcherActionsPosition="header-right"
+          enableHeaderActionButtons
           searcherActions={this.searcherActions()}
         />
       </Fragment>
