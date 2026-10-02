@@ -180,8 +180,7 @@ class CatchmentSearcher extends Component {
           onDoubleClick={this.onDoubleClick}
           sorts={this.sorts}
           rowDisabled={(selection, row) => !!row.validityTo}
-          enableActionButtons
-          searcherActionsPosition="header-right"
+          enableHeaderActionButtons
           searcherActions={this.searcherActions()}
         />
       </div>
