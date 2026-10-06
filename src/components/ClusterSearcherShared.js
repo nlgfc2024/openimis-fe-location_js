@@ -130,6 +130,8 @@ class ClusterSearcherShared extends Component {
     this.setState({ confirmedAction }, () => this.props.coreConfirm(
       formatMessage(this.props.intl, "location", "cluster.delete.confirm.title"),
       formatMessageWithValues(this.props.intl, "location", "cluster.delete.confirm.message", cluster),
+      null,
+      "warning",
     ));
   };
 

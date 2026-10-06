@@ -87,6 +87,8 @@ class CatchmentSearcher extends Component {
           code: catchment.code,
           name: catchment.name,
         }),
+        null,
+        "warning",
       ),
     );
   };

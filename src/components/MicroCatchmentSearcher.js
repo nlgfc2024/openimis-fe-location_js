@@ -222,6 +222,8 @@ class MicroCatchmentSearcher extends Component {
           code: mc.code,
           name: mc.name,
         }),
+        null,
+        "warning",
       ),
     );
   };

@@ -147,6 +147,8 @@ class ZonesSearcher extends Component {
           code: zone.code,
           name: zone.name,
         }),
+        null,
+        "warning",
       );
     const confirmedAction = () => {
       this.setState({ pendingDelete: zone });
