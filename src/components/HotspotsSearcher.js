@@ -144,6 +144,8 @@ class HotspotsSearcher extends Component {
           code: hotspot.code,
           name: hotspot.name,
         }),
+        null,
+        "warning",
       );
     const confirmedAction = () => {
       this.setState({ pendingDelete: hotspot });

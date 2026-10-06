@@ -137,6 +137,8 @@ class HealthFacilitiesSearcher extends Component {
           code: hf.code,
           name: hf.name,
         }),
+        null,
+        "warning",
       );
     let confirmedAction = () =>
       this.props.deleteHealthFacility(
