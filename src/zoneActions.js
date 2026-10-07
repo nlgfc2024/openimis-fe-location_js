@@ -48,12 +48,6 @@ export function clearZone() {
   };
 }
 
-export function fetchZoneMutation(clientMutationId) {
-  return graphql(formatPageQuery("mutationLogs", [
-    `clientMutationId: "${clientMutationId}"`,
-  ], ["status", "error"]), "LOCATION_ZONE_MUTATION_STATUS");
-}
-
 function formatZoneGQL(zone) {
   return `
     ${zone.uuid !== undefined && zone.uuid !== null ? `uuid: "${zone.uuid}"` : ""}

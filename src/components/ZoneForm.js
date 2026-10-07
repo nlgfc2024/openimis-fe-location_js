@@ -11,12 +11,13 @@ import {
   withHistory,
   coreAlert,
   journalize,
+  waitForMutation,
   formatMessageWithValues,
   Helmet,
   parseData,
   historyPush,
 } from "@openimis/fe-core";
-import { fetchZone, fetchCreatedZone, fetchZoneMutation, clearZone } from "../zoneActions";
+import { fetchZone, fetchCreatedZone, clearZone } from "../zoneActions";
 import ZoneMasterPanel from "./ZoneMasterPanel";
 
 const ZONE_FORM_CONTRIBUTION_KEY = "location.Zone";
@@ -78,23 +79,19 @@ class ZoneForm extends Component {
 
   waitForSave = async (clientMutationId) => {
     try {
-      for (let attempt = 0; attempt < 60 && !this.unmounted; attempt += 1) {
-        const response = await this.props.fetchZoneMutation(clientMutationId);
-        const result = parseData(response?.payload?.data?.mutationLogs)?.[0];
-        if (this.unmounted) return;
-        if (result?.status === 2) {
-          await this.showSuccessAlert();
-          return;
-        }
-        if (result?.status === 1) {
-          // The mutation journal displays the backend error. Keep the form
-          // and entered values available for correction and retry.
-          this.setState({ lockNew: false, isSaved: false, redirectAfterSave: false });
-          return;
-        }
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      const result = await this.props.waitForMutation(clientMutationId);
+      if (this.unmounted) return;
+      if (result?.status === 2) {
+        await this.showSuccessAlert();
+        return;
       }
-      if (!this.unmounted) this.props.coreAlert("Zone save pending", "The save is still pending. Check the activity journal before trying again.");
+      if (result?.status === 1) {
+        // The mutation journal displays the backend error. Keep the form
+        // and entered values available for correction and retry.
+        this.setState({ lockNew: false, isSaved: false, redirectAfterSave: false });
+        return;
+      }
+      this.props.coreAlert("Zone save pending", "The save is still pending. Check the activity journal before trying again.");
     } catch (error) {
       if (!this.unmounted) this.props.coreAlert("Unable to confirm Zone save", "Check the activity journal before trying again.");
     }
@@ -285,7 +282,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => bindActionCreators(
-  { fetchZone, fetchCreatedZone, fetchZoneMutation, clearZone, coreAlert, journalize },
+  { fetchZone, fetchCreatedZone, clearZone, coreAlert, journalize, waitForMutation },
   dispatch,
 );
 
