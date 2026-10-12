@@ -6,6 +6,7 @@ import { Grid } from "@material-ui/core";
 import TypeLocationsPaper from "../components/TypeLocationsPaper";
 import {
   fetchLocations,
+  fetchLocationsStr,
   clearLocations,
   createOrUpdateLocation,
   deleteLocation,
@@ -246,13 +247,12 @@ class LocationsPage extends Component {
     return (
       <div className={classes.page}>
         <Helmet title={formatMessage(this.props.intl, "location", "location.locations.page.title")} />
-        <Grid container spacing={1}>
-          <Grid item xs={8}>
-            <Grid container spacing={1}>
-              <Grid item xs={4}>
+        <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} lg={4}>
                 <TypeLocationsPaper
                   type={0}
                   onRefresh={() => this.props.fetchLocations(this.locationTypes, 0, null)}
+                  onSearch={(search) => this.props.fetchLocationsStr(this.props.modulesManager, 0, null, null, null, search)}
                   onDelete={createRegionLocationRight ? (l, idx) => this.onDelete(l, idx, 0) : null}
                   onSelect={(l0) => this.setState({ l0 })}
                   onEdit={createRegionLocationRight ? (l) => this.onEdit(l, 0) : null}
@@ -274,10 +274,11 @@ class LocationsPage extends Component {
                   reassign={true}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={12} sm={6} lg={4}>
                 <TypeLocationsPaper
                   type={1}
                   onRefresh={() => this.props.fetchLocations(this.locationTypes, 1, this.state.l0)}
+                  onSearch={(search) => this.props.fetchLocationsStr(this.props.modulesManager, 1, null, null, this.state.l0, search)}
                   onDelete={createRegionLocationRight ? (l, idx) => this.onDelete(l, idx, 1) : null}
                   onSelect={(l1) => this.setState({ l1 })}
                   onEdit={createRegionLocationRight ? (l) => this.onEdit(l, 1) : null}
@@ -299,10 +300,11 @@ class LocationsPage extends Component {
                   reassign={true}
                 />
               </Grid>
-              <Grid item xs={4}>
+              <Grid item xs={12} sm={6} lg={4}>
                 <TypeLocationsPaper
                   type={2}
                   onRefresh={() => this.props.fetchLocations(this.locationTypes, 2, this.state.l1)}
+                  onSearch={(search) => this.props.fetchLocationsStr(this.props.modulesManager, 2, null, null, this.state.l1, search)}
                   onDelete={createRegionLocationRight ? (l, idx) => this.onDelete(l, idx, 2) : null}
                   onSelect={(l2) => this.setState({ l2 })}
                   onEdit={createRegionLocationRight ? (l) => this.onEdit(l, 2) : null}
@@ -324,12 +326,11 @@ class LocationsPage extends Component {
                   reassign={true}
                 />
               </Grid>
-            </Grid>
-          </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={12} sm={6} lg={4}>
             <TypeLocationsPaper
               type={3}
               onRefresh={() => this.props.fetchLocations(this.locationTypes, 3, this.state.l2)}
+              onSearch={(search) => this.props.fetchLocationsStr(this.props.modulesManager, 3, null, null, this.state.l2, search)}
               onDelete={createRegionLocationRight ? (l, idx) => this.onDelete(l, idx, 3) : null}
               onSelect={(l3) => this.setState({ l3 })}
               onEdit={createRegionLocationRight ? (l) => this.onEdit(l, 3) : null}
@@ -383,6 +384,7 @@ const mapDispatchToProps = (dispatch) => {
   return bindActionCreators(
     {
       fetchLocations,
+      fetchLocationsStr,
       clearLocations,
       journalize,
       createOrUpdateLocation,

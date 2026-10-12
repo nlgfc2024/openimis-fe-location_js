@@ -2,8 +2,12 @@ import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
 import { withTheme, withStyles } from "@material-ui/core/styles";
-import { Paper, List, ListItem, ListItemText, IconButton, ListItemSecondaryAction } from "@material-ui/core";
+import {
+  Paper, List, ListItem, ListItemText, IconButton, ListItemSecondaryAction,
+  TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button,
+} from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
+import SearchIcon from "@material-ui/icons/Search";
 import MoveIcon from "@material-ui/icons/Shuffle";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ReplayIcon from "@material-ui/icons/Replay";
@@ -27,6 +31,13 @@ const styles = (theme) => ({
   paperHeaderMessage: theme.paper.message,
   paperHeaderAction: theme.paper.action,
   lockedRow: theme.table.lockedRow,
+  locationText: {
+    minWidth: 0,
+    paddingRight: theme.spacing(10),
+  },
+  locationActions: {
+    whiteSpace: "nowrap",
+  },
 });
 
 class ActionDialogs extends Component {
@@ -157,11 +168,13 @@ class ResultPane extends Component {
                 onDoubleClick={(e) => !!l.uuid && !readOnly && rights.includes(RIGHT_LOCATION_EDIT) && onEdit(l)}
                 className={!l.uuid || !!l.clientMutationId ? classes.lockedRow : null}
               >
-                <ListItemText>
-                  {l.code} - {l.name}
-                </ListItemText>
+                <ListItemText
+                  className={classes.locationText}
+                  primary={`${l.code} - ${l.name}`}
+                  primaryTypographyProps={{ noWrap: true }}
+                />
                 {!!l.uuid && (
-                  <ListItemSecondaryAction>
+                  <ListItemSecondaryAction className={classes.locationActions}>
                     {!!onMove && rights.includes(RIGHT_LOCATION_MOVE) && (
                       <Tooltip title="Move">
                         <IconButton onClick={(e) => onMove(l)}>
@@ -193,6 +206,25 @@ class ResultPane extends Component {
 const StyledResultPane = withTheme(withStyles(styles)(ResultPane));
 
 class TypeLocationsPaper extends Component {
+  state = {
+    search: "",
+    searchDialogOpen: false,
+  };
+
+  applySearch = () => {
+    const { onRefresh, onSearch } = this.props;
+    if (onSearch) {
+      onSearch(this.state.search);
+    } else {
+      onRefresh();
+    }
+    this.setState({ searchDialogOpen: false });
+  };
+
+  openSearchDialog = () => this.setState({ searchDialogOpen: true });
+
+  closeSearchDialog = () => this.setState({ searchDialogOpen: false });
+
   render() {
     const {
       classes,
@@ -202,6 +234,7 @@ class TypeLocationsPaper extends Component {
       onEdit,
       readOnly,
       location,
+      onSearch,
       ...others
     } = this.props;
     const createRegionLocationRight = this.props?.rights.includes(RIGHT_REGION_LOCATION_ADD);
@@ -221,18 +254,50 @@ class TypeLocationsPaper extends Component {
         icon: <AddIcon />,
       });
     }
+    actions.push({
+      action: this.openSearchDialog,
+      icon: <SearchIcon />,
+      label: formatMessage(this.props.intl, "location", "locations.searcher.searchButton"),
+      variant: "outlined",
+      borderless: false,
+    });
     return (
       <Paper className={classes.paper}>
         {!readOnly && <StyledActionDialogs {...others} />}
         <SearcherPane
           module="location"
           title={title || `locations.searcher.title.${this.props.type}`}
-          refresh={onRefresh}
           SearchIcon={ReplayIcon}
           actions={actions}
           readOnly={readOnly}
           resultsPane={<StyledResultPane onEdit={onEdit} rights={rights} readOnly={readOnly} {...others} />}
         />
+        <Dialog open={this.state.searchDialogOpen} onClose={this.closeSearchDialog} fullWidth maxWidth="xs">
+          <DialogTitle>{formatMessage(this.props.intl, "location", "locations.searcher.dialogTitle")}</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              fullWidth
+              label={formatMessage(this.props.intl, "location", "locations.searcher.search")}
+              value={this.state.search}
+              onChange={(event) => this.setState({ search: event.target.value })}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  this.applySearch();
+                }
+              }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.closeSearchDialog}>
+              {formatMessage(this.props.intl, "location", "locations.searcher.cancel")}
+            </Button>
+            <Button color="primary" variant="contained" onClick={this.applySearch}>
+              {formatMessage(this.props.intl, "location", "locations.searcher.searchButton")}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Paper>
     );
   }
@@ -242,4 +307,4 @@ const mapStateToProps = (state) => ({
   rights: !!state.core && !!state.core.user && !!state.core.user.i_user ? state.core.user.i_user.rights : [],
 });
 
-export default withTheme(connect(mapStateToProps)(withStyles(styles)(TypeLocationsPaper)));
+export default injectIntl(withTheme(connect(mapStateToProps)(withStyles(styles)(TypeLocationsPaper))));
