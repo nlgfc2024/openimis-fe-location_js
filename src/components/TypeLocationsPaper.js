@@ -168,11 +168,14 @@ class ResultPane extends Component {
                 onDoubleClick={(e) => !!l.uuid && !readOnly && rights.includes(RIGHT_LOCATION_EDIT) && onEdit(l)}
                 className={!l.uuid || !!l.clientMutationId ? classes.lockedRow : null}
               >
-                <ListItemText
-                  className={classes.locationText}
-                  primary={`${l.code} - ${l.name}`}
-                  primaryTypographyProps={{ noWrap: true }}
-                />
+                <Tooltip title={l.code ? `${l.code} - ${l.name}` : l.name || ""}>
+                  <ListItemText
+                    className={classes.locationText}
+                    primary={l.name}
+                    primaryTypographyProps={{ noWrap: true }}
+                    tabIndex={0}
+                  />
+                </Tooltip>
                 {!!l.uuid && (
                   <ListItemSecondaryAction className={classes.locationActions}>
                     {!!onMove && rights.includes(RIGHT_LOCATION_MOVE) && (
