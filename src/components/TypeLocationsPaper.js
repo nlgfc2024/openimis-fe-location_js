@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import {
-  Paper, List, ListItem, ListItemText, IconButton, ListItemSecondaryAction,
+  Paper, List, ListItem, ListItemText, IconButton,
   TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Divider,
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
@@ -47,13 +47,32 @@ const styles = (theme) => ({
   },
   lockedRow: theme.table.lockedRow,
   locationText: {
+    flex: "1 1 0",
     minWidth: 0,
-    paddingRight: theme.spacing(12),
+    marginRight: theme.spacing(1),
   },
   locationActions: {
+    display: "flex",
+    alignItems: "center",
+    flexShrink: 0,
     whiteSpace: "nowrap",
   },
 });
+
+const LocationTooltip = withStyles((theme) => ({
+  tooltip: {
+    fontSize: theme.typography.pxToRem(14),
+    lineHeight: 1.5,
+    padding: theme.spacing(1, 1.5),
+    maxWidth: 320,
+    backgroundColor: "#263238",
+    color: "#fff",
+    overflowWrap: "anywhere",
+  },
+  arrow: {
+    color: "#263238",
+  },
+}))(Tooltip);
 
 class ActionDialogs extends Component {
   render() {
@@ -183,34 +202,38 @@ class ResultPane extends Component {
                 onDoubleClick={(e) => !!l.uuid && !readOnly && rights.includes(RIGHT_LOCATION_EDIT) && onEdit(l)}
                 className={!l.uuid || !!l.clientMutationId ? classes.lockedRow : null}
               >
-                <Tooltip title={l.code ? `${l.code} - ${l.name}` : l.name || ""}>
+                <LocationTooltip arrow title={l.code ? `${l.code} - ${l.name}` : l.name || ""}>
                   <ListItemText
                     className={classes.locationText}
                     primary={l.name}
                     primaryTypographyProps={{ noWrap: true }}
                     tabIndex={0}
                   />
-                </Tooltip>
+                </LocationTooltip>
                 {!!l.uuid && (
-                  <ListItemSecondaryAction className={classes.locationActions}>
+                  <div
+                    className={classes.locationActions}
+                    onClick={(event) => event.stopPropagation()}
+                    onDoubleClick={(event) => event.stopPropagation()}
+                  >
                     {!!onMove && rights.includes(RIGHT_LOCATION_MOVE) && (
-                      <Tooltip title="Move">
+                      <LocationTooltip arrow title="Move">
                         <IconButton onClick={(e) => onMove(l)}>
                           <MoveIcon />
                         </IconButton>
-                      </Tooltip>
+                      </LocationTooltip>
                     )}
                     {!!onDelete && rights.includes(RIGHT_LOCATION_DELETE) && (
-                      <Tooltip title="Delete">
+                      <LocationTooltip arrow title="Delete">
                         <IconButton onClick={(e) => onDelete(l, idx)}>
                           <DeleteIcon />
                         </IconButton>
-                      </Tooltip>
+                      </LocationTooltip>
                     )}
                     {!!InlineInput && (
                       <InlineInput location={l} onChange={onChange} inlineValue={inlineValue} readOnly={readOnly} />
                     )}
-                  </ListItemSecondaryAction>
+                  </div>
                 )}
               </ListItem>
             ))}
@@ -287,11 +310,11 @@ class TypeLocationsPaper extends Component {
           </Typography>
           <div className={classes.paperHeaderActions}>
             {actions.map(({ action, icon, label }, index) => (
-              <Tooltip key={index} title={label}>
+              <LocationTooltip arrow key={index} title={label}>
                 <IconButton color="inherit" onClick={action} aria-label={label}>
                   {icon}
                 </IconButton>
-              </Tooltip>
+              </LocationTooltip>
             ))}
           </div>
         </div>
