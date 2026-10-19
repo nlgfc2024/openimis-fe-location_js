@@ -475,6 +475,7 @@ class MicroCatchmentSearcher extends Component {
           rowLocked={this.rowLocked}
           onFiltersApplied={this.onFiltersApplied}
           enableHeaderActionButtons
+          compactLayout
           searcherActions={this.searcherActions()}
         />
         <input

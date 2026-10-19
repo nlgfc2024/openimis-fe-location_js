@@ -82,14 +82,14 @@ class DetailedLocationFilter extends Component {
   };
 
   render() {
-    const { classes, split = false, useLocationPickers = false } = this.props;
+    const { classes, split = false, pickersForAllLevels = false } = this.props;
     let grid = split ? 12 : 6;
-    const firstPickerLevel = useLocationPickers ? 0 : this.locationTypes.length - 2;
+    const firstPickerLevel = pickersForAllLevels ? 0 : this.locationTypes.length - 2;
     const pickerCount = this.locationTypes.length - firstPickerLevel;
-    const pickerWidth = Math.floor((useLocationPickers ? 12 : grid) / pickerCount);
+    const pickerWidth = Math.floor((pickersForAllLevels ? 12 : grid) / pickerCount);
     return (
       <Grid container className={classes.form}>
-        {!useLocationPickers && (
+        {!pickersForAllLevels && (
           <Grid item xs={grid}>
             <CoarseLocationFilter reset={this.state.reset} {...this.props} onChange={this.onChange} />
           </Grid>
