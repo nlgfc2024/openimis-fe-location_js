@@ -4,14 +4,14 @@ import { injectIntl } from "react-intl";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import {
   Paper, List, ListItem, ListItemText, IconButton, ListItemSecondaryAction,
-  TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button,
+  TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Divider,
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import SearchIcon from "@material-ui/icons/Search";
 import MoveIcon from "@material-ui/icons/Shuffle";
 import DeleteIcon from "@material-ui/icons/Delete";
 import Tooltip from "@material-ui/core/Tooltip";
-import { formatMessage, formatMessageWithValues, SearcherPane, ProgressOrError } from "@openimis/fe-core";
+import { formatMessage, formatMessageWithValues, ProgressOrError } from "@openimis/fe-core";
 import EditLocationDialog from "./EditLocationDialog";
 import MoveLocationDialog from "./MoveLocationDialog";
 import DeleteLocationDialog from "../components/DeleteLocationDialog";
@@ -25,14 +25,30 @@ import {
 
 const styles = (theme) => ({
   paper: theme.paper.body,
-  paperHeader: theme.paper.header,
-  paperHeaderTitle: theme.paper.title,
-  paperHeaderMessage: theme.paper.message,
-  paperHeaderAction: theme.paper.action,
+  paperHeader: {
+    ...theme.paper.header,
+    display: "flex",
+    alignItems: "center",
+    padding: theme.spacing(1, 2),
+  },
+  paperHeaderTitle: {
+    ...theme.paper.title,
+    flex: 1,
+    minWidth: 0,
+    padding: 0,
+    overflowWrap: "anywhere",
+  },
+  paperHeaderActions: {
+    display: "flex",
+    flexShrink: 0,
+  },
+  locationList: {
+    width: "100%",
+  },
   lockedRow: theme.table.lockedRow,
   locationText: {
     minWidth: 0,
-    paddingRight: theme.spacing(10),
+    paddingRight: theme.spacing(12),
   },
   locationActions: {
     whiteSpace: "nowrap",
@@ -157,7 +173,7 @@ class ResultPane extends Component {
       <Fragment>
         <ProgressOrError progress={fetching} error={error} />
         {!!fetched && !!locations && !error && (
-          <List component="nav">
+          <List component="nav" className={classes.locationList}>
             {locations.map((l, idx) => (
               <ListItem
                 key={`location-${type}-${idx}`}
@@ -186,7 +202,7 @@ class ResultPane extends Component {
                     )}
                     {!!onDelete && rights.includes(RIGHT_LOCATION_DELETE) && (
                       <Tooltip title="Delete">
-                        <IconButton edge="end" onClick={(e) => onDelete(l, idx)}>
+                        <IconButton onClick={(e) => onDelete(l, idx)}>
                           <DeleteIcon />
                         </IconButton>
                       </Tooltip>
@@ -254,25 +270,33 @@ class TypeLocationsPaper extends Component {
       actions.push({
         action: (e) => onEdit(null),
         icon: <AddIcon />,
+        label: formatMessage(this.props.intl, "location", "locations.searcher.addButton"),
       });
     }
     actions.push({
       action: this.openSearchDialog,
       icon: <SearchIcon />,
       label: formatMessage(this.props.intl, "location", "locations.searcher.searchButton"),
-      variant: "outlined",
-      borderless: false,
     });
     return (
       <Paper className={classes.paper}>
         {!readOnly && <StyledActionDialogs {...others} />}
-        <SearcherPane
-          module="location"
-          title={title || `locations.searcher.title.${this.props.type}`}
-          actions={actions}
-          readOnly={readOnly}
-          resultsPane={<StyledResultPane onEdit={onEdit} rights={rights} readOnly={readOnly} {...others} />}
-        />
+        <div className={classes.paperHeader}>
+          <Typography component="h2" className={classes.paperHeaderTitle}>
+            {formatMessage(this.props.intl, "location", title || `locations.searcher.title.${this.props.type}`)}
+          </Typography>
+          <div className={classes.paperHeaderActions}>
+            {actions.map(({ action, icon, label }, index) => (
+              <Tooltip key={index} title={label}>
+                <IconButton color="inherit" onClick={action} aria-label={label}>
+                  {icon}
+                </IconButton>
+              </Tooltip>
+            ))}
+          </div>
+        </div>
+        <Divider />
+        <StyledResultPane onEdit={onEdit} location={location} rights={rights} readOnly={readOnly} {...others} />
         <Dialog open={this.state.searchDialogOpen} onClose={this.closeSearchDialog} fullWidth maxWidth="xs">
           <DialogTitle>{formatMessage(this.props.intl, "location", "locations.searcher.dialogTitle")}</DialogTitle>
           <DialogContent>

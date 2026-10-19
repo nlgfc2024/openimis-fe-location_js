@@ -68,6 +68,7 @@
   "location.locations.searcher.title.3.catchments": "Village Catchments",
   "location.locations.searcher.search": "Search by code or name",
   "location.locations.searcher.searchButton": "Search",
+  "location.locations.searcher.addButton": "Add location",
   "location.locations.searcher.dialogTitle": "Search locations",
   "location.locations.searcher.cancel": "Cancel",
   "location.EditDialog.save": "Save",
