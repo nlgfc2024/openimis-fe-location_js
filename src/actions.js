@@ -230,7 +230,18 @@ export function fetchLocationsStr(mm, level, regions = null, districts = null, p
   } else {
     filterLocationByParents(districts, regions, filters, types[level]);
   }
-  let projections = ["id", "uuid", "type", "code", "name", nestParentsProjections(level)];
+  let projections = [
+    "id",
+    "uuid",
+    "type",
+    "code",
+    "name",
+    "malePopulation",
+    "femalePopulation",
+    "otherPopulation",
+    "families",
+    nestParentsProjections(level),
+  ];
   return graphqlWithVariables(
     `
       {
@@ -304,10 +315,10 @@ function formatLocationGQL(location) {
     code: "${formatGQLString(location.code)}"
     name: "${formatGQLString(location.name)}"
     ${!!location.parentUuid ? `parentUuid: "${location.parentUuid}"` : ""}
-    ${!!location.malePopulation ? `malePopulation: ${location.malePopulation}` : ""}
-    ${!!location.femalePopulation ? `femalePopulation: ${location.femalePopulation}` : ""}
-    ${!!location.otherPopulation ? `otherPopulation: ${location.otherPopulation}` : ""}
-    ${!!location.families ? `families: ${location.families}` : ""}
+    ${location.malePopulation !== undefined && location.malePopulation !== null ? `malePopulation: ${location.malePopulation}` : ""}
+    ${location.femalePopulation !== undefined && location.femalePopulation !== null ? `femalePopulation: ${location.femalePopulation}` : ""}
+    ${location.otherPopulation !== undefined && location.otherPopulation !== null ? `otherPopulation: ${location.otherPopulation}` : ""}
+    ${location.families !== undefined && location.families !== null ? `families: ${location.families}` : ""}
     type: "${location.type}"
   `;
 }

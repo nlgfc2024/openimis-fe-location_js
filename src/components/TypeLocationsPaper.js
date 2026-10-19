@@ -268,6 +268,7 @@ class TypeLocationsPaper extends Component {
           module="location"
           title={title || `locations.searcher.title.${this.props.type}`}
           SearchIcon={ReplayIcon}
+          refresh={onRefresh}
           actions={actions}
           readOnly={readOnly}
           resultsPane={<StyledResultPane onEdit={onEdit} rights={rights} readOnly={readOnly} {...others} />}
