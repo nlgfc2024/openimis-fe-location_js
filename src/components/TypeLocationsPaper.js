@@ -10,7 +10,6 @@ import AddIcon from "@material-ui/icons/Add";
 import SearchIcon from "@material-ui/icons/Search";
 import MoveIcon from "@material-ui/icons/Shuffle";
 import DeleteIcon from "@material-ui/icons/Delete";
-import ReplayIcon from "@material-ui/icons/Replay";
 import Tooltip from "@material-ui/core/Tooltip";
 import { formatMessage, formatMessageWithValues, SearcherPane, ProgressOrError } from "@openimis/fe-core";
 import EditLocationDialog from "./EditLocationDialog";
@@ -270,8 +269,6 @@ class TypeLocationsPaper extends Component {
         <SearcherPane
           module="location"
           title={title || `locations.searcher.title.${this.props.type}`}
-          SearchIcon={ReplayIcon}
-          refresh={onRefresh}
           actions={actions}
           readOnly={readOnly}
           resultsPane={<StyledResultPane onEdit={onEdit} rights={rights} readOnly={readOnly} {...others} />}
