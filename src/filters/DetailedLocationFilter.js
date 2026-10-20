@@ -82,33 +82,43 @@ class DetailedLocationFilter extends Component {
   };
 
   render() {
-    const { classes, split = false } = this.props;
+    const { classes, split = false, pickersForAllLevels = false } = this.props;
     let grid = split ? 12 : 6;
+    const firstPickerLevel = pickersForAllLevels ? 0 : this.locationTypes.length - 2;
+    const pickerCount = this.locationTypes.length - firstPickerLevel;
+    const pickerWidth = Math.floor((pickersForAllLevels ? 12 : grid) / pickerCount);
     return (
       <Grid container className={classes.form}>
-        <Grid item xs={grid}>
-          <CoarseLocationFilter reset={this.state.reset} {...this.props} onChange={this.onChange} />
-        </Grid>
-        {_.times(this.locationTypes.length - 2, (i) => (
+        {!pickersForAllLevels && (
+          <Grid item xs={grid}>
+            <CoarseLocationFilter reset={this.state.reset} {...this.props} onChange={this.onChange} />
+          </Grid>
+        )}
+        {_.times(pickerCount, (i) => {
+          const locationLevel = firstPickerLevel + i;
+          return (
           <ControlledField
             module="location"
-            id={`DetailedLocationFilter.location_${this.locationTypes.length - 2 + i}`}
-            key={`location_${this.locationTypes.length - 2 + i}`}
+            id={`DetailedLocationFilter.location_${locationLevel}`}
+            key={`location_${locationLevel}`}
             field={
-              <Grid item xs={Math.floor(grid / (this.locationTypes.length - 2))} className={classes.item}>
+              <Grid item xs={pickerWidth} className={classes.item}>
                 <PublishedComponent
                   pubRef="location.LocationPicker"
-                  value={this._filterValue(`${this.props.anchor}_${this.locationTypes.length - 2 + i}`)}
+                  value={this._filterValue(`${this.props.anchor}_${locationLevel}`)}
                   withNull={true}
                   reset={this.state.reset}
-                  onChange={(v, s) => this.onChange(this.locationTypes.length - 2 + i, v, s)}
-                  parentLocation={this._filterValue(`${this.props.anchor}_${this.locationTypes.length - 3 + i}`)}
-                  locationLevel={this.locationTypes.length - 2 + i}
+                  onChange={(v, s) => this.onChange(locationLevel, v, s)}
+                  parentLocation={locationLevel > 0
+                    ? this._filterValue(`${this.props.anchor}_${locationLevel - 1}`)
+                    : null}
+                  locationLevel={locationLevel}
                 />
               </Grid>
             }
           />
-        ))}
+          );
+        })}
       </Grid>
     );
   }
