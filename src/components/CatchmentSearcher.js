@@ -174,6 +174,12 @@ class CatchmentSearcher extends Component {
             count: catchmentsTotalCount || 0,
           })}
           headers={this.headers}
+          columnWidths={[
+            '20%',
+            '25%',
+            undefined,
+            ...(this.hasRight(RIGHT_CATCHMENT_EDIT) || this.hasRight(RIGHT_CATCHMENT_DELETE) ? ['112px'] : []),
+          ]}
           itemFormatters={this.itemFormatters}
           filtersToQueryParams={this.filtersToQueryParams}
           rowsPerPageOptions={this.rowsPerPageOptions}

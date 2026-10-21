@@ -464,6 +464,14 @@ class MicroCatchmentSearcher extends Component {
             count: microCatchmentsTotalCount || 0,
           })}
           headers={this.headers}
+          columnWidths={[
+            '15%',
+            '20%',
+            '18%',
+            '20%',
+            undefined,
+            ...(this.hasRight(RIGHT_MICRO_CATCHMENT_EDIT) || this.hasRight(RIGHT_MICRO_CATCHMENT_DELETE) ? ['112px'] : []),
+          ]}
           itemFormatters={this.itemFormatters}
           filtersToQueryParams={this.filtersToQueryParams}
           rowsPerPageOptions={this.rowsPerPageOptions}

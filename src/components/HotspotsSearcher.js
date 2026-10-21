@@ -199,6 +199,15 @@ class HotspotsSearcher extends Component {
           FilterPane={HotspotFilter}
           tableTitle={formatMessageWithValues(intl, "location", "hotspotSummaries", { count })}
           headers={this.headers}
+          columnWidths={[
+            '12%',
+            '16%',
+            '15%',
+            '16%',
+            '18%',
+            undefined,
+            ...(this.props.rights.includes(RIGHT_HOTSPOT_EDIT) || this.props.rights.includes(RIGHT_HOTSPOT_DELETE) ? ['112px'] : []),
+          ]}
           itemFormatters={this.itemFormatters}
           sorts={this.sorts}
           onDoubleClick={onDoubleClick}
