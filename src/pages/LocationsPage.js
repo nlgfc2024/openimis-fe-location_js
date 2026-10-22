@@ -248,7 +248,7 @@ class LocationsPage extends Component {
       <div className={classes.page}>
         <Helmet title={formatMessage(this.props.intl, "location", "location.locations.page.title")} />
         <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} lg={4}>
+              <Grid item xs={12} sm={6} lg={3}>
                 <TypeLocationsPaper
                   type={0}
                   onRefresh={() => this.props.fetchLocations(this.locationTypes, 0, null)}
@@ -274,7 +274,7 @@ class LocationsPage extends Component {
                   reassign={true}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} lg={4}>
+              <Grid item xs={12} sm={6} lg={3}>
                 <TypeLocationsPaper
                   type={1}
                   onRefresh={() => this.props.fetchLocations(this.locationTypes, 1, this.state.l0)}
@@ -300,7 +300,7 @@ class LocationsPage extends Component {
                   reassign={true}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} lg={4}>
+              <Grid item xs={12} sm={6} lg={3}>
                 <TypeLocationsPaper
                   type={2}
                   onRefresh={() => this.props.fetchLocations(this.locationTypes, 2, this.state.l1)}
@@ -326,7 +326,7 @@ class LocationsPage extends Component {
                   reassign={true}
                 />
               </Grid>
-          <Grid item xs={12} sm={6} lg={4}>
+          <Grid item xs={12} sm={6} lg={3}>
             <TypeLocationsPaper
               type={3}
               onRefresh={() => this.props.fetchLocations(this.locationTypes, 3, this.state.l2)}

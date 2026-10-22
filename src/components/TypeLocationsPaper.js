@@ -3,16 +3,15 @@ import { connect } from "react-redux";
 import { injectIntl } from "react-intl";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import {
-  Paper, List, ListItem, ListItemText, IconButton, ListItemSecondaryAction,
-  TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button,
+  Paper, List, ListItem, ListItemText, IconButton,
+  TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Divider,
 } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import SearchIcon from "@material-ui/icons/Search";
 import MoveIcon from "@material-ui/icons/Shuffle";
 import DeleteIcon from "@material-ui/icons/Delete";
-import ReplayIcon from "@material-ui/icons/Replay";
 import Tooltip from "@material-ui/core/Tooltip";
-import { formatMessage, formatMessageWithValues, SearcherPane, ProgressOrError } from "@openimis/fe-core";
+import { formatMessage, formatMessageWithValues, ProgressOrError } from "@openimis/fe-core";
 import EditLocationDialog from "./EditLocationDialog";
 import MoveLocationDialog from "./MoveLocationDialog";
 import DeleteLocationDialog from "../components/DeleteLocationDialog";
@@ -26,16 +25,36 @@ import {
 
 const styles = (theme) => ({
   paper: theme.paper.body,
-  paperHeader: theme.paper.header,
-  paperHeaderTitle: theme.paper.title,
-  paperHeaderMessage: theme.paper.message,
-  paperHeaderAction: theme.paper.action,
+  paperHeader: {
+    ...theme.paper.header,
+    display: "flex",
+    alignItems: "center",
+    padding: theme.spacing(1, 2),
+  },
+  paperHeaderTitle: {
+    ...theme.paper.title,
+    flex: 1,
+    minWidth: 0,
+    padding: 0,
+    overflowWrap: "anywhere",
+  },
+  paperHeaderActions: {
+    display: "flex",
+    flexShrink: 0,
+  },
+  locationList: {
+    width: "100%",
+  },
   lockedRow: theme.table.lockedRow,
   locationText: {
+    flex: "1 1 0",
     minWidth: 0,
-    paddingRight: theme.spacing(10),
+    marginRight: theme.spacing(1),
   },
   locationActions: {
+    display: "flex",
+    alignItems: "center",
+    flexShrink: 0,
     whiteSpace: "nowrap",
   },
 });
@@ -158,7 +177,7 @@ class ResultPane extends Component {
       <Fragment>
         <ProgressOrError progress={fetching} error={error} />
         {!!fetched && !!locations && !error && (
-          <List component="nav">
+          <List component="nav" className={classes.locationList}>
             {locations.map((l, idx) => (
               <ListItem
                 key={`location-${type}-${idx}`}
@@ -168,23 +187,30 @@ class ResultPane extends Component {
                 onDoubleClick={(e) => !!l.uuid && !readOnly && rights.includes(RIGHT_LOCATION_EDIT) && onEdit(l)}
                 className={!l.uuid || !!l.clientMutationId ? classes.lockedRow : null}
               >
-                <ListItemText
-                  className={classes.locationText}
-                  primary={`${l.code} - ${l.name}`}
-                  primaryTypographyProps={{ noWrap: true }}
-                />
+                <Tooltip arrow title={l.code ? `${l.code} - ${l.name}` : l.name || ""}>
+                  <ListItemText
+                    className={classes.locationText}
+                    primary={l.name}
+                    primaryTypographyProps={{ noWrap: true }}
+                    tabIndex={0}
+                  />
+                </Tooltip>
                 {!!l.uuid && (
-                  <ListItemSecondaryAction className={classes.locationActions}>
+                  <div
+                    className={classes.locationActions}
+                    onClick={(event) => event.stopPropagation()}
+                    onDoubleClick={(event) => event.stopPropagation()}
+                  >
                     {!!onMove && rights.includes(RIGHT_LOCATION_MOVE) && (
-                      <Tooltip title="Move">
+                      <Tooltip arrow title="Move">
                         <IconButton onClick={(e) => onMove(l)}>
                           <MoveIcon />
                         </IconButton>
                       </Tooltip>
                     )}
                     {!!onDelete && rights.includes(RIGHT_LOCATION_DELETE) && (
-                      <Tooltip title="Delete">
-                        <IconButton edge="end" onClick={(e) => onDelete(l, idx)}>
+                      <Tooltip arrow title="Delete">
+                        <IconButton onClick={(e) => onDelete(l, idx)}>
                           <DeleteIcon />
                         </IconButton>
                       </Tooltip>
@@ -192,7 +218,7 @@ class ResultPane extends Component {
                     {!!InlineInput && (
                       <InlineInput location={l} onChange={onChange} inlineValue={inlineValue} readOnly={readOnly} />
                     )}
-                  </ListItemSecondaryAction>
+                  </div>
                 )}
               </ListItem>
             ))}
@@ -252,27 +278,33 @@ class TypeLocationsPaper extends Component {
       actions.push({
         action: (e) => onEdit(null),
         icon: <AddIcon />,
+        label: formatMessage(this.props.intl, "location", "locations.searcher.addButton"),
       });
     }
     actions.push({
       action: this.openSearchDialog,
       icon: <SearchIcon />,
       label: formatMessage(this.props.intl, "location", "locations.searcher.searchButton"),
-      variant: "outlined",
-      borderless: false,
     });
     return (
       <Paper className={classes.paper}>
         {!readOnly && <StyledActionDialogs {...others} />}
-        <SearcherPane
-          module="location"
-          title={title || `locations.searcher.title.${this.props.type}`}
-          SearchIcon={ReplayIcon}
-          refresh={onRefresh}
-          actions={actions}
-          readOnly={readOnly}
-          resultsPane={<StyledResultPane onEdit={onEdit} rights={rights} readOnly={readOnly} {...others} />}
-        />
+        <div className={classes.paperHeader}>
+          <Typography component="h2" className={classes.paperHeaderTitle}>
+            {formatMessage(this.props.intl, "location", title || `locations.searcher.title.${this.props.type}`)}
+          </Typography>
+          <div className={classes.paperHeaderActions}>
+            {actions.map(({ action, icon, label }, index) => (
+              <Tooltip arrow key={index} title={label}>
+                <IconButton color="inherit" onClick={action} aria-label={label}>
+                  {icon}
+                </IconButton>
+              </Tooltip>
+            ))}
+          </div>
+        </div>
+        <Divider />
+        <StyledResultPane onEdit={onEdit} location={location} rights={rights} readOnly={readOnly} {...others} />
         <Dialog open={this.state.searchDialogOpen} onClose={this.closeSearchDialog} fullWidth maxWidth="xs">
           <DialogTitle>{formatMessage(this.props.intl, "location", "locations.searcher.dialogTitle")}</DialogTitle>
           <DialogContent>
