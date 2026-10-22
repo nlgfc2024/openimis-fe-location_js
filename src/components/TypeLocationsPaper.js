@@ -59,21 +59,6 @@ const styles = (theme) => ({
   },
 });
 
-const LocationTooltip = withStyles((theme) => ({
-  tooltip: {
-    fontSize: theme.typography.pxToRem(14),
-    lineHeight: 1.5,
-    padding: theme.spacing(1, 1.5),
-    maxWidth: 320,
-    backgroundColor: "#263238",
-    color: "#fff",
-    overflowWrap: "anywhere",
-  },
-  arrow: {
-    color: "#263238",
-  },
-}))(Tooltip);
-
 class ActionDialogs extends Component {
   render() {
     const {
@@ -202,14 +187,14 @@ class ResultPane extends Component {
                 onDoubleClick={(e) => !!l.uuid && !readOnly && rights.includes(RIGHT_LOCATION_EDIT) && onEdit(l)}
                 className={!l.uuid || !!l.clientMutationId ? classes.lockedRow : null}
               >
-                <LocationTooltip arrow title={l.code ? `${l.code} - ${l.name}` : l.name || ""}>
+                <Tooltip arrow title={l.code ? `${l.code} - ${l.name}` : l.name || ""}>
                   <ListItemText
                     className={classes.locationText}
                     primary={l.name}
                     primaryTypographyProps={{ noWrap: true }}
                     tabIndex={0}
                   />
-                </LocationTooltip>
+                </Tooltip>
                 {!!l.uuid && (
                   <div
                     className={classes.locationActions}
@@ -217,18 +202,18 @@ class ResultPane extends Component {
                     onDoubleClick={(event) => event.stopPropagation()}
                   >
                     {!!onMove && rights.includes(RIGHT_LOCATION_MOVE) && (
-                      <LocationTooltip arrow title="Move">
+                      <Tooltip arrow title="Move">
                         <IconButton onClick={(e) => onMove(l)}>
                           <MoveIcon />
                         </IconButton>
-                      </LocationTooltip>
+                      </Tooltip>
                     )}
                     {!!onDelete && rights.includes(RIGHT_LOCATION_DELETE) && (
-                      <LocationTooltip arrow title="Delete">
+                      <Tooltip arrow title="Delete">
                         <IconButton onClick={(e) => onDelete(l, idx)}>
                           <DeleteIcon />
                         </IconButton>
-                      </LocationTooltip>
+                      </Tooltip>
                     )}
                     {!!InlineInput && (
                       <InlineInput location={l} onChange={onChange} inlineValue={inlineValue} readOnly={readOnly} />
@@ -310,11 +295,11 @@ class TypeLocationsPaper extends Component {
           </Typography>
           <div className={classes.paperHeaderActions}>
             {actions.map(({ action, icon, label }, index) => (
-              <LocationTooltip arrow key={index} title={label}>
+              <Tooltip arrow key={index} title={label}>
                 <IconButton color="inherit" onClick={action} aria-label={label}>
                   {icon}
                 </IconButton>
-              </LocationTooltip>
+              </Tooltip>
             ))}
           </div>
         </div>
