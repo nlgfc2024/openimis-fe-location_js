@@ -240,7 +240,8 @@ class MicroCatchmentForm extends Component {
             {/* District (top level of the Malawi hierarchy = Location type R) */}
             <Grid item xs={4} className={classes.item}>
               <PublishedComponent
-                pubRef="location.RegionPicker"
+                pubRef="location.MwDistrictPicker"
+                label={formatMessage(intl, "location", "microCatchment.district")}
                 value={district}
                 readOnly={readOnly}
                 required
@@ -250,8 +251,7 @@ class MicroCatchmentForm extends Component {
             {/* Traditional Authorities */}
             <Grid item xs={12} className={classes.item}>
               <PublishedComponent
-                pubRef="location.LocationPicker"
-                locationLevel={1}
+                pubRef="location.MwTAPicker"
                 label={formatMessage(intl, "location", "microCatchment.traditionalAuthority")}
                 multiple
                 value={selectedTAs}
@@ -263,8 +263,7 @@ class MicroCatchmentForm extends Component {
             {/* GVHs */}
             <Grid item xs={12} className={classes.item}>
               <PublishedComponent
-                pubRef="location.LocationPicker"
-                locationLevel={2}
+                pubRef="location.MwGVHPicker"
                 label={formatMessage(intl, "location", "microCatchment.gvh")}
                 multiple
                 value={selectedGVHs}
