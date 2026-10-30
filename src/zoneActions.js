@@ -1,4 +1,43 @@
-import { graphql, formatPageQuery, formatPageQueryWithCount, formatGQLString, formatMutation } from "@openimis/fe-core";
+import {
+  graphql,
+  graphqlWithVariables,
+  formatPageQuery,
+  formatPageQueryWithCount,
+  formatGQLString,
+  formatMutation,
+} from "@openimis/fe-core";
+
+export function waitForZoneMutation(clientMutationId) {
+  return async (dispatch) => {
+    let result = null;
+    for (let attempt = 0; attempt <= 10; attempt += 1) {
+      if (attempt > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 100 * attempt));
+      }
+      const response = await dispatch(
+        graphqlWithVariables(
+          `query ($clientMutationId: String) {
+            mutationLogs(clientMutationId: $clientMutationId) {
+              edges { node { status clientMutationId jsonContent error } }
+            }
+          }`,
+          { clientMutationId },
+        ),
+      );
+      if (response?.error) return null;
+      result = response?.payload?.data?.mutationLogs?.edges?.[0]?.node || null;
+      if (result && result.status !== 0) break;
+    }
+    if (result?.status === 1 && result.error) {
+      try {
+        result.error = JSON.parse(result.error);
+      } catch (error) {
+        // Keep the raw backend error when it is not JSON.
+      }
+    }
+    return result;
+  };
+}
 
 export function fetchZoneSummaries(filters) {
   const projections = [

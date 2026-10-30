@@ -11,13 +11,12 @@ import {
   withHistory,
   coreAlert,
   journalize,
-  waitForMutation,
   formatMessageWithValues,
   Helmet,
   parseData,
   historyPush,
 } from "@openimis/fe-core";
-import { fetchZone, fetchCreatedZone, clearZone } from "../zoneActions";
+import { fetchZone, fetchCreatedZone, clearZone, waitForZoneMutation } from "../zoneActions";
 import ZoneMasterPanel from "./ZoneMasterPanel";
 
 const ZONE_FORM_CONTRIBUTION_KEY = "location.Zone";
@@ -79,7 +78,7 @@ class ZoneForm extends Component {
 
   waitForSave = async (clientMutationId) => {
     try {
-      const result = await this.props.waitForMutation(clientMutationId);
+      const result = await this.props.waitForZoneMutation(clientMutationId);
       if (this.unmounted) return;
       if (result?.status === 2) {
         await this.showSuccessAlert();
@@ -282,7 +281,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => bindActionCreators(
-  { fetchZone, fetchCreatedZone, clearZone, coreAlert, journalize, waitForMutation },
+  { fetchZone, fetchCreatedZone, clearZone, coreAlert, journalize, waitForZoneMutation },
   dispatch,
 );
 
