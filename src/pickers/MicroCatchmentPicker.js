@@ -14,6 +14,7 @@ const MicroCatchmentPicker = (props) => {
     label,
     placeholder,
     district,
+    benefitPlanId,
     filterOptions,
     filterSelectedOptions,
   } = props;
@@ -24,8 +25,14 @@ const MicroCatchmentPicker = (props) => {
 
   const { data, isLoading, error } = useGraphqlQuery(
     `
-    query MicroCatchmentPicker ($search: String, $district: String) {
-      microCatchments(first: 20, name_Icontains: $search, district_Uuid: $district, orderBy: ["name"]) {
+    query MicroCatchmentPicker ($search: String, $district: String, $benefitPlanId: ID) {
+      microCatchments(
+        first: 20,
+        name_Icontains: $search,
+        district_Uuid: $district,
+        benefitPlanId: $benefitPlanId,
+        orderBy: ["name"]
+      ) {
         edges {
           node {
             id
@@ -40,7 +47,7 @@ const MicroCatchmentPicker = (props) => {
       }
     }
   `,
-    { search: searchString, district: district?.uuid },
+    { search: searchString, district: district?.uuid, benefitPlanId },
   );
 
   return (
