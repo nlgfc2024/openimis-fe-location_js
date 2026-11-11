@@ -5,6 +5,7 @@ import { bindActionCreators } from "redux";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { Button, Divider, Grid, Paper, Typography } from "@material-ui/core";
 import {
+  coreAlert,
   FormattedMessage,
   PublishedComponent,
   TextInput,
@@ -49,7 +50,17 @@ class CatchmentForm extends Component {
 
     if (prevProps.submittingMutation && !this.props.submittingMutation) {
       this.props.journalize(this.props.mutation);
-      if (!this.props.catchmentUuid) {
+      if (this.props.mutation?.id) {
+        const isUpdate = !!this.props.catchmentUuid;
+        this.props.coreAlert(
+          formatMessage(this.props.intl, "location", "catchment.alert.success"),
+          formatMessageWithValues(
+            this.props.intl,
+            "location",
+            isUpdate ? "catchment.update.success" : "catchment.create.success",
+            { name: this.state.catchment.name },
+          ),
+        );
         historyPush(this.props.modulesManager, this.props.history, "location.route.catchments");
       }
     }
@@ -190,7 +201,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) =>
-  bindActionCreators({ fetchCatchment, clearCatchment, createCatchment, updateCatchment, journalize }, dispatch);
+  bindActionCreators({ fetchCatchment, clearCatchment, createCatchment, updateCatchment, journalize, coreAlert }, dispatch);
 
 export default withModulesManager(
   withHistory(connect(mapStateToProps, mapDispatchToProps)(injectIntl(withTheme(withStyles(styles)(CatchmentForm))))),
