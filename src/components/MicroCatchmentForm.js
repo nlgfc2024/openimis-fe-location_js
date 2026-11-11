@@ -227,7 +227,7 @@ class MicroCatchmentForm extends Component {
               />
             </Grid>
             {isEditing && (
-              <Grid item xs={4} className={classes.item}>
+              <Grid item xs={4} className={classes.item} style={{ display: "none" }}>
                 <TextInput
                   module="location"
                   label="microCatchment.type"
