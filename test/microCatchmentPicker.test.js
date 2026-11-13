@@ -35,6 +35,7 @@ const localRequire = (moduleName) => {
     return interopRequireDefault;
   }
   if (moduleName === "@babel/runtime/helpers/slicedToArray") return slicedToArray;
+  if (moduleName.startsWith("@babel/runtime/helpers/")) return require(moduleName);
   throw new Error(`Unexpected module: ${moduleName}`);
 };
 
