@@ -5,6 +5,7 @@ import { bindActionCreators } from "redux";
 import { withTheme, withStyles } from "@material-ui/core/styles";
 import { Button, Divider, Grid, Paper, Typography } from "@material-ui/core";
 import {
+  coreAlert,
   FormattedMessage,
   PublishedComponent,
   TextInput,
@@ -12,6 +13,7 @@ import {
   formatMessageWithValues,
   historyPush,
   journalize,
+  waitForMutation,
   withHistory,
   withModulesManager,
 } from "@openimis/fe-core";
@@ -25,10 +27,11 @@ const styles = (theme) => ({
   item: theme.paper.item,
 });
 
-class CatchmentForm extends Component {
+export class CatchmentForm extends Component {
   state = {
     catchment: { districts: [] },
     attemptedSave: false,
+    saving: false,
   };
 
   componentDidMount() {
@@ -47,15 +50,44 @@ class CatchmentForm extends Component {
       });
     }
 
-    if (prevProps.submittingMutation && !this.props.submittingMutation) {
+    if (this.state.saving && prevProps.submittingMutation && !this.props.submittingMutation) {
       this.props.journalize(this.props.mutation);
-      if (!this.props.catchmentUuid) {
-        historyPush(this.props.modulesManager, this.props.history, "location.route.catchments");
+      if (this.props.mutation?.id) {
+        this.confirmSave(this.props.mutation.clientMutationId);
+      } else {
+        this.setState({ saving: false });
       }
     }
   }
 
+  confirmSave = async (clientMutationId) => {
+    try {
+      const result = await this.props.waitForMutation(clientMutationId);
+      if (this.unmounted) return;
+      if (result?.status === 2) {
+        const isUpdate = !!this.props.catchmentUuid;
+        this.props.coreAlert(
+          formatMessage(this.props.intl, "location", "catchment.alert.success"),
+          formatMessageWithValues(
+            this.props.intl,
+            "location",
+            isUpdate ? "catchment.update.success" : "catchment.create.success",
+            { name: this.state.catchment.name },
+          ),
+        );
+        historyPush(this.props.modulesManager, this.props.history, "location.route.catchments");
+      } else if (result?.status !== 1) {
+        this.props.coreAlert("Catchment save pending", "Check the activity journal before trying again.");
+      }
+    } catch (error) {
+      if (!this.unmounted) this.props.coreAlert("Unable to confirm Catchment save", "Check the activity journal before trying again.");
+    } finally {
+      if (!this.unmounted) this.setState({ saving: false });
+    }
+  };
+
   componentWillUnmount() {
+    this.unmounted = true;
     this.props.clearCatchment();
   }
 
@@ -73,11 +105,12 @@ class CatchmentForm extends Component {
     return errors;
   };
 
-  canSave = () => !this.props.readOnly && this.validationErrors().length === 0;
+  canSave = () => !this.state.saving && !this.props.readOnly && this.validationErrors().length === 0;
 
   save = () => {
     this.setState({ attemptedSave: true });
     if (!this.canSave()) return;
+    this.setState({ saving: true });
 
     const { catchment } = this.state;
     const label = formatMessageWithValues(this.props.intl, "location", "catchment.mutationLabel", {
@@ -190,7 +223,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) =>
-  bindActionCreators({ fetchCatchment, clearCatchment, createCatchment, updateCatchment, journalize }, dispatch);
+  bindActionCreators({ fetchCatchment, clearCatchment, createCatchment, updateCatchment, journalize, coreAlert, waitForMutation }, dispatch);
 
 export default withModulesManager(
   withHistory(connect(mapStateToProps, mapDispatchToProps)(injectIntl(withTheme(withStyles(styles)(CatchmentForm))))),

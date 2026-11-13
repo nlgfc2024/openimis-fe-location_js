@@ -13,6 +13,7 @@ import {
   formatMessageWithValues,
   coreAlert,
   journalize,
+  waitForMutation,
   PublishedComponent,
   TextInput,
   FormattedMessage,
@@ -36,7 +37,7 @@ const styles = (theme) => ({
   lockedPage: theme.page.locked,
 });
 
-class MicroCatchmentForm extends Component {
+export class MicroCatchmentForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -44,6 +45,7 @@ class MicroCatchmentForm extends Component {
       selectedTAs: [],
       selectedGVHs: [],
       attemptedSave: false,
+      saving: false,
     };
   }
 
@@ -65,13 +67,31 @@ class MicroCatchmentForm extends Component {
         });
       }
     }
-    if (prevProps.submittingMutation && !this.props.submittingMutation) {
+    if (this.state.saving && prevProps.submittingMutation && !this.props.submittingMutation) {
       this.props.journalize(this.props.mutation);
       if (this.props.mutation?.id) {
-        this.showSuccessAlert();
+        this.confirmSave(this.props.mutation.clientMutationId);
+      } else {
+        this.setState({ saving: false });
       }
     }
   }
+
+  confirmSave = async (clientMutationId) => {
+    try {
+      const result = await this.props.waitForMutation(clientMutationId);
+      if (this.unmounted) return;
+      if (result?.status === 2) {
+        await this.showSuccessAlert();
+      } else if (result?.status !== 1) {
+        this.props.coreAlert("Micro-Catchment save pending", "Check the activity journal before trying again.");
+      }
+    } catch (error) {
+      if (!this.unmounted) this.props.coreAlert("Unable to confirm Micro-Catchment save", "Check the activity journal before trying again.");
+    } finally {
+      if (!this.unmounted) this.setState({ saving: false });
+    }
+  };
 
   showSuccessAlert = async () => {
     const isUpdate = !!this.props.microCatchmentUuid;
@@ -80,7 +100,7 @@ class MicroCatchmentForm extends Component {
     if (!isUpdate) {
       const districtUuid = savedMicroCatchment.district?.uuid;
       if (districtUuid && savedMicroCatchment.name) {
-        for (let attempt = 0; attempt < 12 && !savedMicroCatchment.code; attempt += 1) {
+        for (let attempt = 0; attempt < 12 && !savedMicroCatchment.code && !this.unmounted; attempt += 1) {
           try {
             const response = await this.props.fetchCreatedMicroCatchment(districtUuid, savedMicroCatchment.name);
             const createdMicroCatchments = parseData(response?.payload?.data?.microCatchments) || [];
@@ -95,6 +115,7 @@ class MicroCatchmentForm extends Component {
       }
     }
 
+    if (this.unmounted) return;
     const displayCode = savedMicroCatchment.code || savedMicroCatchment.name || "";
     this.props.coreAlert(
       formatMessage(this.props.intl, "location", "microCatchment.alert.success"),
@@ -109,6 +130,7 @@ class MicroCatchmentForm extends Component {
   };
 
   componentWillUnmount() {
+    this.unmounted = true;
     this.props.clearMicroCatchment();
   }
 
@@ -130,6 +152,7 @@ class MicroCatchmentForm extends Component {
   _save = () => {
     this.setState({ attemptedSave: true });
     if (!this._canSave()) return;
+    this.setState({ saving: true });
     const { microCatchment, selectedTAs, selectedGVHs } = this.state;
     const payload = {
       ...microCatchment,
@@ -175,7 +198,7 @@ class MicroCatchmentForm extends Component {
   _canSave = () => {
     const { readOnly = false } = this.props;
     const { microCatchment } = this.state;
-    if (readOnly) return false;
+    if (readOnly || this.state.saving) return false;
     if (!microCatchment.name) return false;
     return this._validationErrors().length === 0;
   };
@@ -321,6 +344,7 @@ const mapDispatchToProps = (dispatch) =>
       updateMicroCatchment,
       coreAlert,
       journalize,
+      waitForMutation,
     },
     dispatch,
   );
