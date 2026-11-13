@@ -226,17 +226,6 @@ class MicroCatchmentForm extends Component {
                 onChange={(v) => this._updateMC("name", v)}
               />
             </Grid>
-            {isEditing && (
-              <Grid item xs={4} className={classes.item}>
-                <TextInput
-                  module="location"
-                  label="microCatchment.type"
-                  value={microCatchment.type || ""}
-                  readOnly={readOnly}
-                  onChange={(v) => this._updateMC("type", v)}
-                />
-              </Grid>
-            )}
             {/* District (top level of the Malawi hierarchy = Location type R) */}
             <Grid item xs={4} className={classes.item}>
               <PublishedComponent
