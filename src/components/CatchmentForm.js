@@ -77,10 +77,18 @@ export class CatchmentForm extends Component {
         );
         historyPush(this.props.modulesManager, this.props.history, "location.route.catchments");
       } else if (result?.status !== 1) {
-        this.props.coreAlert("Catchment save pending", "Check the activity journal before trying again.");
+        this.props.coreAlert(
+          formatMessage(this.props.intl, "location", "catchment.save.pending"),
+          formatMessage(this.props.intl, "location", "catchment.save.checkJournal"),
+        );
       }
     } catch (error) {
-      if (!this.unmounted) this.props.coreAlert("Unable to confirm Catchment save", "Check the activity journal before trying again.");
+      if (!this.unmounted) {
+        this.props.coreAlert(
+          formatMessage(this.props.intl, "location", "catchment.save.unconfirmed"),
+          formatMessage(this.props.intl, "location", "catchment.save.checkJournal"),
+        );
+      }
     } finally {
       if (!this.unmounted) this.setState({ saving: false });
     }

@@ -84,10 +84,18 @@ export class MicroCatchmentForm extends Component {
       if (result?.status === 2) {
         await this.showSuccessAlert();
       } else if (result?.status !== 1) {
-        this.props.coreAlert("Micro-Catchment save pending", "Check the activity journal before trying again.");
+        this.props.coreAlert(
+          formatMessage(this.props.intl, "location", "microCatchment.save.pending"),
+          formatMessage(this.props.intl, "location", "microCatchment.save.checkJournal"),
+        );
       }
     } catch (error) {
-      if (!this.unmounted) this.props.coreAlert("Unable to confirm Micro-Catchment save", "Check the activity journal before trying again.");
+      if (!this.unmounted) {
+        this.props.coreAlert(
+          formatMessage(this.props.intl, "location", "microCatchment.save.unconfirmed"),
+          formatMessage(this.props.intl, "location", "microCatchment.save.checkJournal"),
+        );
+      }
     } finally {
       if (!this.unmounted) this.setState({ saving: false });
     }

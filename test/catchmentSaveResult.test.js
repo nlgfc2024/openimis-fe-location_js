@@ -1,6 +1,7 @@
 const assert = require("assert");
 const path = require("path");
 const babel = require("@babel/core");
+const messages = require("../src/translations/en.json");
 
 class Component {
   constructor(props) { this.props = props; }
@@ -19,7 +20,11 @@ function loadForm(name, redirects) {
   });
   const exports = {};
   Function("exports", "Component", "formatMessage", "formatMessageWithValues", "historyPush", code)(
-    exports, Component, () => "Success", () => "Saved", (...args) => redirects.push(args),
+    exports, Component, (_, module, key) => {
+      assert.strictEqual(module, "location");
+      assert.ok(messages[key], `Missing translation: ${key}`);
+      return messages[key];
+    }, () => "Saved", (...args) => redirects.push(args),
   );
   return exports[name];
 }
@@ -58,6 +63,13 @@ async function run() {
         await confirmation;
         assert.strictEqual(redirects.length, outcome === 2 ? 1 : 0);
         assert.strictEqual(alerts.length, outcome === 1 ? 0 : 1);
+        if ([0, null, "error"].includes(outcome)) {
+          const label = name === "CatchmentForm" ? "Catchment" : "Micro-Catchment";
+          assert.deepStrictEqual(alerts[0], [
+            outcome === "error" ? `Unable to confirm ${label} save` : `${label} save pending`,
+            "Check the activity journal before trying again.",
+          ]);
+        }
         assert.strictEqual(form.state.catchment, values);
         assert.strictEqual(form.state.microCatchment, values);
         assert.strictEqual(form.state.saving, false);
