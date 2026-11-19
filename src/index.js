@@ -1,5 +1,5 @@
 import ClustersPage from "./pages/ClustersPage";
-import GeospatialDashboard from "./geo/GeospatialDashboard";
+import GeospatialDashboard from "./geo/GeospatialBridge";
 import ClusterEditPage from "./pages/ClusterEditPage";
 import ZonesPage from "./pages/ZonesPage";
 import ZoneEditPage from "./pages/ZoneEditPage";
@@ -294,6 +294,10 @@ const DEFAULT_CONFIG = {
 
 export const LocationModule = (cfg) => {
   let config = { ...DEFAULT_CONFIG, ...cfg };
+  if (cfg?.useMappingDashboard) {
+    config["openSearchReports.MainMenu"] = (config["openSearchReports.MainMenu"] || [])
+      .filter((entry) => entry.id !== "location.geospatial");
+  }
   var levels = config.refs.filter((c) => c.key === "location.Location.MaxLevels")[0].ref;
   config.refs.push({
     key: "location.Location.FlatProjection",
