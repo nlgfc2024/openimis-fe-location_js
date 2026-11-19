@@ -1,4 +1,5 @@
 {
+  "geospatial.menu": "Geospatial dashboard",
   "location.locations.page.title": "Locations",
   "location.healthFacilities.page.title": "Health Facilities",
   "location.healthFacilities.searcherAddAction": "Add Health Facility",

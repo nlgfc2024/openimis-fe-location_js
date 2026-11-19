@@ -1,4 +1,5 @@
 import ClustersPage from "./pages/ClustersPage";
+import GeospatialDashboard from "./geo/GeospatialDashboard";
 import ClusterEditPage from "./pages/ClusterEditPage";
 import ZonesPage from "./pages/ZonesPage";
 import ZoneEditPage from "./pages/ZoneEditPage";
@@ -100,6 +101,7 @@ const DEFAULT_CONFIG = {
   "translations": [{ key: "en", messages: messages_en }],
   "reducers": [{ key: "loc", reducer: reducer }], // location is the default used by syncHistoryWithStore...
   "refs": [
+    { key: "location.GeospatialDashboard", ref: GeospatialDashboard },
     { key: "location.route.clusters", ref: "location/clusters" },
     { key: "location.route.cluster", ref: "location/cluster" },
     { key: "location.route.zones", ref: ROUTE_ZONES },
@@ -158,6 +160,7 @@ const DEFAULT_CONFIG = {
     { key: "location.route.catchment", ref: ROUTE_CATCHMENT_EDIT },
   ],
   "core.Router": [
+    { path: "location/geospatial", component: GeospatialDashboard, rights: [RIGHT_LOCATIONS] },
     { path: "location/clusters", component: ClustersPage, rights: [RIGHT_CLUSTER_SEARCH] },
     { path: "location/cluster", component: ClusterEditPage, rights: [RIGHT_CLUSTER_ADD] },
     { path: "location/cluster/:cluster_uuid", component: ClusterEditPage, rights: [RIGHT_CLUSTER_SEARCH] },
@@ -219,6 +222,10 @@ const DEFAULT_CONFIG = {
       component: CatchmentEditPage,
       rights: [RIGHT_CATCHMENT_SEARCH],
     },
+  ],
+  "openSearchReports.MainMenu": [
+    { text: <FormattedMessage module="location" id="geospatial.menu" />, icon: <LocationOn />, route: "/location/geospatial",
+      id: "location.geospatial", filter: (rights) => hasRight(rights, RIGHT_LOCATIONS) },
   ],
   "admin.MainMenu": [
     {
